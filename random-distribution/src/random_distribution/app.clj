@@ -1,7 +1,5 @@
-(ns random-distribution.core
-  (:require [quil.core :as q]
-            [quil.middleware :as m]
-            [random-distribution.app :as a]))
+(ns random-distribution.app
+  (:require [quil.core :as q]))
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
@@ -24,7 +22,7 @@
   ; Clear the sketch by filling it with light-grey color.
   (q/background 240)
   ; set a fill color for the bars
-  (q/fill 175)
+  (q/fill 174)
   ; Calculate the width of each bar
   (let [num-bars (count state)
         window-width (q/width)
@@ -36,17 +34,3 @@
                          y (- window-height bar-height)]
                      (q/rect x y bar-width bar-height)))
                  state))))
-
-(q/defsketch random-distribution
-  :title "Random Distribution"
-  :size [640 480]
-  ; setup function called only once, during sketch initialization.
-  :setup a/setup
-  ; update-state is called on each iteration before draw-state.
-  :update a/update-state
-  :draw a/draw-state
-  :features [:keep-on-top]
-  ; This sketch uses functional-mode middleware.
-  ; Check quil wiki for more info about middlewares and particularly
-  ; fun-mode.
-  :middleware [m/fun-mode])
