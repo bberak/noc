@@ -4,7 +4,7 @@
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
-  (q/frame-rate 60)
+  (q/frame-rate 1)
   ; Set color mode to HSB (HSV) instead of default RGB.
   (q/color-mode :hsb)
   ; Set the bg-color to a light grey (only once)
@@ -14,26 +14,36 @@
   {:x (/ (q/width) 2)
    :y (/ (q/height) 2)})
 
+(defn get-random [min max]
+  (q/random min max))
+
+(defn get-levy-flight-random [min max]
+  (let [r1 (get-random min max)
+        p r1
+        r2 (get-random min max)]
+    (if (< r2 p)
+      r1
+      (get-levy-flight-random min max))))
+
 (defn update-state [state]
   ; Update sketch state by changing the x and y coordinates
-  {:x (+ (q/random -1 1) (:x state))
-   :y (+ (q/random -1 1) (:y state))})
+  {:x (+ (get-levy-flight-random -1 1) (:x state))
+   :y (+ (get-levy-flight-random -1 1) (:y state))})
 
 (defn draw-state [state]
   ; Draw a point in the x and y position
   (q/point (:x state) (:y state)))
 
-(defn -main []
-  (q/defsketch random-walker
-    :title "Random Walkker"
-    :size [500 500]
-    ; setup function called only once, during sketch initialization.
-    :setup setup
-    ; update-state is called on each iteration before draw-state.
-    :update update-state
-    :draw draw-state
-    :features [:keep-on-top]
-    ; This sketch uses functional-mode middleware.
-    ; Check quil wiki for more info about middlewares and particularly
-    ; fun-mode.
-    :middleware [m/fun-mode]))
+(q/defsketch random-walker
+  :title "Random Walkker"
+  :size [500 500]
+  ; setup function called only once, during sketch initialization.
+  :setup setup
+  ; update-state is called on each iteration before draw-state.
+  :update update-state
+  :draw draw-state
+  :features [:keep-on-top]
+  ; This sketch uses functional-mode middleware.
+  ; Check quil wiki for more info about middlewares and particularly
+  ; fun-mode.
+  :middleware [m/fun-mode])

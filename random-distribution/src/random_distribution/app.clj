@@ -22,7 +22,7 @@
   ; Clear the sketch by filling it with light-grey color.
   (q/background 240)
   ; set a fill color for the bars
-  (q/fill 174)
+  (q/fill 175)
   ; Calculate the width of each bar
   (let [num-bars (count state)
         window-width (q/width)
