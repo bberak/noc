@@ -4,7 +4,7 @@
 
 (defn setup []
   ; Set frame rate to 30 frames per second.
-  (q/frame-rate 1)
+  (q/frame-rate 30)
   ; Set color mode to HSB (HSV) instead of default RGB.
   (q/color-mode :hsb)
   ; Set the bg-color to a light grey (only once)
@@ -17,18 +17,20 @@
 (defn get-random [min max]
   (q/random min max))
 
-(defn get-levy-flight-random [min max]
+(defn get-monte-carlo-random [min max]
   (let [r1 (get-random min max)
         p r1
         r2 (get-random min max)]
     (if (< r2 p)
       r1
-      (get-levy-flight-random min max))))
+      (get-monte-carlo-random min max))))
 
 (defn update-state [state]
   ; Update sketch state by changing the x and y coordinates
-  {:x (+ (get-levy-flight-random -1 1) (:x state))
-   :y (+ (get-levy-flight-random -1 1) (:y state))})
+  (let [stepsize (get-monte-carlo-random 0 5)
+        neg-stepsize (* stepsize -1)]
+    {:x (+ (get-random neg-stepsize stepsize) (:x state))
+     :y (+ (get-random neg-stepsize stepsize) (:y state))}))
 
 (defn draw-state [state]
   ; Draw a point in the x and y position

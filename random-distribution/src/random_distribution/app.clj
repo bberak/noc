@@ -7,8 +7,9 @@
   ; Set color mode to HSB (HSV) instead of default RGB.
   (q/color-mode :hsb)
   ; create seq of maps containing a num and count
-  (vec (map (fn [n] {:count 0})
-            (range 1 20))))
+  {:t 0
+   :bars (vec (map (fn [n] {:count 0})
+            (range 1 20)))})
 
 (defn get-random [min max]
   (int (q/random min max)))
@@ -27,13 +28,19 @@
       (int r1)
       (get-monte-carlo-random min max))))
 
+(defn get-noise-random [t max-num]
+  (int (* (q/noise t) max-num)))
+
 (defn update-state [state]
   ; Update the graph by selecting a new random number
   ; and updating the count on the corresponding key-value-pair
-  (let [min-num 0
-        max-num (count state)
+  (let [bars (:bars state)
+        next-t (+ (:t state) 0.01)
+        min-num 0
+        max-num (count bars)
         next-random-num (get-gaussian-random min-num max-num)]
-    (update-in state [next-random-num :count] inc)))
+    {:t next-t
+     :bars (update-in bars [next-random-num :count] inc)}))
 
 (defn draw-state [state]
   ; Clear the sketch by filling it with light-grey color.
@@ -41,7 +48,8 @@
   ; set a fill color for the bars
   (q/fill 175)
   ; Calculate the width of each bar
-  (let [num-bars (count state)
+  (let [bars (:bars state)
+        num-bars (count bars)
         window-width (q/width)
         window-height (q/height)
         bar-width (/ window-width num-bars)]
@@ -50,4 +58,4 @@
                          bar-height (:count num)
                          y (- window-height bar-height)]
                      (q/rect x y bar-width bar-height)))
-                 state))))
+                 bars))))
