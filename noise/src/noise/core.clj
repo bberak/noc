@@ -10,22 +10,35 @@
   ; Clear the sketch by filling it with light-grey color.
   (q/background 240)
   ; setup function returns initial state.
-  {:t 0
-   :x 0
-   :y 0})
+  {:tx 0
+   :ty 10000 ; Often referred to as the y-offset
+   :x (/ (q/width) 2)
+   :y (/ (q/height) 2)})
 
-(defn get-y-using-noise [t]
-  (* (q/noise t) (q/height)))
+(defn get-random-using-noise [t min max]
+  (q/map-range (q/noise t) 0 1 min max))
 
-(defn get-y-using-random [min max]
+(defn get-random [min max]
   (q/random min max))
 
 (defn update-state [state]
-  (let [t (+ (:t state) 0.1001)
-        x (+ (:x state) 1)
-        y (get-y-using-noise t)]
-    ; (println (str "t: " t " x: " x " y: " y))
-    {:t t
+  (let [tx (+ (:tx state) 0.01)
+        ty (+ (:ty state) 0.01)
+        ; Uncomment lines below to plot a y vs time graph
+        ; x (+ (:x state) 1)
+        ; y (get-random-using-noise ty 0 (q/height))]
+        ; Uncomment lines below to render a random walker
+        ; whose x and y values are determined by Perlin noise
+        x (get-random-using-noise tx 0 (q/width))
+        y (get-random-using-noise ty 0 (q/height))]
+        ; Uncomment lines below to render a random walker
+        ; whose x and y stepsizes vary using Perlin noise
+        ; stepsize-x (get-random-using-noise tx -5 5)
+        ; stepsize-y (get-random-using-noise ty -5 5)
+        ; x (+ (:x state) stepsize-x)
+        ; y (+ (:y state) stepsize-y)]
+    {:tx tx
+     :ty ty
      :x x
      :y y}))
 
@@ -35,7 +48,7 @@
   ; No stroke on circles
   (q/no-stroke)
   ; Draw the circle.
-  (q/ellipse (:x state) (:y state) 2 2))
+  (q/ellipse (:x state) (:y state) 5 5))
 
 (q/defsketch noise
   :title "Noise"
