@@ -10,12 +10,29 @@
   (vec (map (fn [n] {:count 0})
             (range 1 20))))
 
+(defn get-random [min max]
+  (int (q/random min max)))
+
+(defn get-gaussian-random [min max]
+  (let [mean (/ (+ min max) 2)
+        sd 5
+        next-rand (q/random-gaussian)]
+  (int (+ (* sd next-rand) mean))))
+
+(defn get-monte-carlo-random [min max]
+  (let [r1 (q/random min max)
+        p r1
+        r2 (q/random min max)]
+    (if (< r2 p)
+      (int r1)
+      (get-monte-carlo-random min max))))
+
 (defn update-state [state]
   ; Update the graph by selecting a new random number
   ; and updating the count on the corresponding key-value-pair
   (let [min-num 0
         max-num (count state)
-        next-random-num (int (q/random min-num max-num))]
+        next-random-num (get-gaussian-random min-num max-num)]
     (update-in state [next-random-num :count] inc)))
 
 (defn draw-state [state]
