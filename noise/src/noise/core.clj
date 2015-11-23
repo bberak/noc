@@ -9,9 +9,13 @@
   (q/color-mode :hsb)
   ; Clear the sketch by filling it with light-grey color.
   (q/background 240)
-  ; setup function returns initial state.
-  {:tx 0
-   :ty 10000 ; Often referred to as the y-offset
+  ; Setup function returns initial state.
+  ; The :tx and :ty values do not really represent time. More like
+  ; space (location) on a fixed noise signal
+  {:tx 0 ; Often referred to as the x-offset (xoff)
+   :ty 10000 ; Often referred to as the y-offset (yoff). In this case, we want to
+             ; sample the noise signal for our y-value from a different location than
+             ; the x location. Otherwise our walker would move in a diagnol line
    :x (/ (q/width) 2)
    :y (/ (q/height) 2)})
 
