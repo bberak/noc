@@ -5,6 +5,7 @@
 (defn setup []
   (q/background 255)
   (q/frame-rate 30)
+  (q/noise-detail 6)
   {:t 0})
 
 (defn update-state [state]
