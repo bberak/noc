@@ -30,6 +30,7 @@
     (doseq [x (range 0 100)
             z (range 0 50)]
       (let [y (q/map-range (q/noise (* x noise-scale) (* z noise-scale) (* t noise-scale)) 0 1 -25 25)]
+        (q/fill (q/map-range y -25 25 255 0) 0 140)
         (draw-box x y z point-scale)))))
 
 (defn -main []
