@@ -3,7 +3,7 @@
             [quil.middleware :as m]))
 
 (defn setup []
-  (q/frame-rate 30)
+  (q/frame-rate 60)
   (q/noise-detail 4)
   (q/camera  1.5 -251.5 (/ (/ (q/height) 2.0) (Math/tan (/ (* Math/PI 60.0) 360.0))) ; eye
             (/ (q/width) 2.0) (/ (q/height) 2.0) 0 ; centre
