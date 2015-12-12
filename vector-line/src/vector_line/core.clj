@@ -15,6 +15,9 @@
   {:x (- (:x v1) (:x v2))
    :y (- (:y v1) (:y v2))})
 
+(defn get-magnitude [v1]
+  (q/sqrt (+ (q/pow (:x v1) 2) (q/pow (:y v1) 2))))
+
 (defn update-state [state]
   {:mouse {:x (q/mouse-x)
            :y (q/mouse-y)}})
@@ -22,8 +25,10 @@
 (defn draw-state [state]
   (q/background 240)
   (let [center {:x (/ (q/width) 2) :y (/ (q/height) 2)}
-        scale 0.5
-        mouse (multiply-vector (subtract-vectors (:mouse state) center) scale)]
+        scale 1.0
+        mouse (multiply-vector (subtract-vectors (:mouse state) center) scale)
+        magnitude (get-magnitude mouse)]
+    (q/rect 0 0 magnitude 10)
     (q/translate (:x center) (:y center))
     (q/line 0
             0
