@@ -28,7 +28,9 @@
         max-speed (:max-speed mover)
         velocity (:velocity mover)
         new-direction (v/subtract mouse location)
-        new-acceleration (v/multiply (v/normalize new-direction) 1.3)
+        distance (v/magnitude new-direction)
+        magnitude-of-acceleration (q/log distance)
+        new-acceleration (v/multiply (v/normalize new-direction) magnitude-of-acceleration)
         new-velocity (v/limit (v/add velocity new-acceleration) max-speed)
         new-location (reset (v/add location new-velocity))]
     {:location new-location
