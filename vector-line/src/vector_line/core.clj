@@ -24,7 +24,7 @@
 
 (defn normalize [v]
   (let [magnitude (get-magnitude v)]
-    (if (= magnitude 0)
+    (if (= magnitude 0.0)
       v
       (divide-vector v magnitude))))
 

@@ -1,4 +1,4 @@
-(ns random-acceleration.vectors
+(ns interactive-acceleration.vectors
   (:require [quil.core :as q]))
 
 (defn -vector-ops [op {x1 :x y1 :y} {x2 :x y2 :y}]
