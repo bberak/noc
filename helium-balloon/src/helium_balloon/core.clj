@@ -13,12 +13,19 @@
   {:time 0
    :balloon (create-balloon)
    :forces {:gravity (v/create 0 0.05)
-            :wind (v/create 0.01 0)
+            :wind (v/create 0.0 0)
             :helium (v/create 0 -0.075)}})
+
+(defn update-helium [time]
+  ;; http://tube.geogebra.org/material/simple/id/1672433#material/1672471
+  ;; y = a * (1 + r / t) ^ [t * (x - h)] + k
+  (let [a -0.53 r -0.08 t 4 x time h 2 k 0]
+    {:x 0
+     :y (+ (* a (Math/pow (+ 1 (/ r t)) (* t (- x h)))) k)}))
 
 (defn update-forces [{gravity :gravity wind :wind helium :helium} time]
   (let [new-wind wind
-        new-helium helium]
+        new-helium (update-helium time)]
     {:gravity gravity
      :wind new-wind
      :helium new-helium}))
