@@ -13,7 +13,7 @@
   {:time 0
    :balloon (create-balloon)
    :forces {:gravity (v/create 0 0.05)
-            :wind (v/create 0.0 0)
+            :wind (v/create 0.0 0.0)
             :helium (v/create 0 -0.075)}})
 
 (defn update-helium [time]
@@ -23,8 +23,13 @@
     {:x 0
      :y (+ (* a (Math/pow (+ 1 (/ r t)) (* t (- x h)))) k)}))
 
+(defn update-wind [time wind-strength]
+  {:x (q/map-range (q/noise time) 0 1 (- wind-strength) wind-strength)
+   :y (q/map-range (q/noise (+ time 10000)) 0 1 (- wind-strength) wind-strength)})
+
 (defn update-forces [{gravity :gravity wind :wind helium :helium} time]
-  (let [new-wind wind
+  (let [wind-strength 0.45
+        new-wind (update-wind time wind-strength)
         new-helium (update-helium time)]
     {:gravity gravity
      :wind new-wind
@@ -47,11 +52,17 @@
      :balloon new-balloon
      :forces new-forces}))
 
-(defn draw-state [{balloon :balloon}]
+(defn draw-state [{balloon :balloon forces :forces} ]
   (q/background 240)
   (q/fill 255 50 50)
   (let [location (:location balloon)]                                  
-    (q/ellipse (:x location) (:y location) 50 50)))
+    (q/ellipse (:x location) (:y location) 50 50))
+  (let [wind (:wind forces)
+        wind-mag (v/magnitude wind)
+        wind-norm (v/normalize wind)
+        wind-scaled (v/multiply wind 50)]
+    (q/with-translation [(/ (q/width) 2) (/ (q/height) 2)]
+      (q/line 0 0 (:x wind-scaled) (:y wind-scaled)))))
 
 (defn -main []
   (q/defsketch helium-balloon
