@@ -6,7 +6,8 @@
 (defn create-balloon []
   {:location (v/create (/ (q/width) 2) (q/height))
    :velocity (v/create 0 0)
-   :max-speed 7})
+   :max-speed 7
+   :mass 1.0})
 
 (defn setup []
   (q/frame-rate 30)
@@ -35,14 +36,15 @@
      :wind new-wind
      :helium new-helium}))
 
-(defn update-balloon [{location :location velocity :velocity max-speed :max-speed} 
+(defn update-balloon [{location :location velocity :velocity max-speed :max-speed mass :mass} 
                       {gravity :gravity wind :wind helium :helium}]
-  (let [new-acceleration (v/add gravity wind helium)
+  (let [new-acceleration (v/divide (v/add gravity wind helium) mass)
         new-velocity (v/limit (v/add velocity new-acceleration) max-speed)
         new-location (v/within-bounds (v/add location new-velocity))]
     {:location new-location
      :velocity new-velocity
-     :max-speed max-speed}))
+     :max-speed max-speed
+     :mass mass}))
 
 (defn update-state [{time :time balloon :balloon forces :forces}]
   (let [new-time (+ 0.01 time)
