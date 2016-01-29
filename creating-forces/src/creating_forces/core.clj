@@ -17,16 +17,16 @@
   (q/frame-rate 30)
   {:balls (doall (map (fn [x] (create-ball)) (range 20)))
    :forces {:wind (v/create 0.01 0)
-            :gravity (v/create 0 0.1)}})
+            :gravity (v/create 0 10.1)}})
 
 (defn update-ball [{location :location velocity :velocity radius :radius max-speed :max-speed mass :mass} 
                    {wind :wind gravity :gravity}]
   (let [acceleration (v/divide (v/add wind gravity) mass)
         new-velocity (v/constrain-magnitude (v/add velocity acceleration) max-speed)
         new-location (v/add location new-velocity)
-        has-breached-bounds (v/breached-bounds? new-location)]
-    {:location (if (true? has-breached-bounds) (v/constrain-bounds new-location) new-location)
-     :velocity (if (true? has-breached-bounds) (v/multiply new-velocity -1) new-velocity)
+        bounce-results (v/bounce {:location new-location :velocity new-velocity})]
+    {:location (:location bounce-results)
+     :velocity (:velocity bounce-results)
      :radius radius
      :max-speed max-speed
      :mass mass}))
