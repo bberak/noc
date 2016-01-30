@@ -6,18 +6,22 @@
 (defn create-ball []
   (let [width (q/width)
         height (q/height)
-        radius (q/random 10 50)]
+        mass (q/random 10 50)
+        radius mass]
     {:location (v/create (q/random 0 width) (q/random 0 height))
      :velocity (v/create (q/random -10 10) (q/random -10 10))
      :radius radius
-     :max-speed (q/random 2 10)
-     :mass radius}))
+     :max-speed 10
+     :mass mass}))
 
 (defn setup []
   (q/frame-rate 30)
   {:balls (doall (map (fn [x] (create-ball)) (range 20)))
    :forces {:wind (v/create 0.01 0)
             :gravity (v/create 0 10.1)}})
+
+(defn scale-gravity [gravity mass]
+  (v/multiply gravity mass))
 
 (defn update-ball [{location :location velocity :velocity radius :radius max-speed :max-speed mass :mass} 
                    {wind :wind gravity :gravity}]
