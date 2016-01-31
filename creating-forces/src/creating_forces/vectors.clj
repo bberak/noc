@@ -25,11 +25,10 @@
 	 :y (/ y n)}))
 
 (defn magnitude [{x :x y :y}]
-  (q/sqrt (+ (q/pow x 2) (q/pow y 2))))
+  (q/sqrt (+ (q/sq x) (q/sq y))))
 
-(defn distance [v1 v2]
-  (let [diff (subtract v1 v2)]
-    (magnitude diff)))
+(defn distance [{x1 :x y1 :y} {x2 :x y2 :y}]
+  (q/dist x1 y1 x2 y2))
 
 (defn normalize [v]
   (let [mag (magnitude v)]
