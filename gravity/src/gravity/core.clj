@@ -7,24 +7,26 @@
   (println anything)
   anything)
 
-(defn create-ball []
+(defn create-ball [id]
   (let [width (q/width)
         height (q/height)
         mass (q/random 1 5)
         radius (* mass 16)]
-    {:location (v/create (q/random 0 (q/width)) (q/random 0 0))
+    {:location (v/create (q/random 0 (q/width)) (q/random 0 (q/height)))
      :velocity (v/create (q/random -10 10) (q/random -10 10))
      :radius radius
      :max-speed 10
      :mass mass
-     :surface-area 2.0}))
+     :surface-area 2.0
+     :id id}))
 
 (defn setup []
   (q/frame-rate 30)
-  {:balls (doall (map (fn [x] (create-ball)) (range 10)))
-   :earth {:location (v/create (/ (q/width) 2) (/ (q/height) 2))
-           :mass 8
-           :radius 128}})
+  (let [num-balls 10] 
+    {:balls (doall (map (fn [x] (create-ball x)) (range num-balls)))
+     :earth {:location (v/create (/ (q/width) 2) (/ (q/height) 2))
+             :mass 8
+             :radius 128}}))
 
 (defn constrain [val min max]
   (cond (< val min) min (> val max) max :else val))
@@ -37,10 +39,16 @@
         gravity 1.0]
     (v/multiply dir-normalized (/ (* gravity (* (:mass obj-1) (:mass obj-2))) (constrain (q/sq dist) 5 25)))))
 
-(defn update-ball [ball earth]
-  (let [mass (:mass ball)
+(defn update-ball [ball balls earth]
+  (let [id (:id ball)
+        mass (:mass ball)
         max-speed (:max-speed ball)
-        acceleration (v/divide (v/add (attract ball earth)) mass)
+        gravitational-forces (conj 
+                               (map 
+                                 (fn [other] (attract ball other)) 
+                                 (filter (fn [other] (not= (:id ball) (:id other))) balls))
+                               (attract ball earth))
+        acceleration (v/divide (apply v/add gravitational-forces) mass)
         new-velocity (v/constrain-magnitude (v/add (:velocity ball) acceleration) max-speed)
         new-location (v/add (:location ball) new-velocity)]
     {:location new-location
@@ -48,25 +56,26 @@
      :radius (:radius ball)
      :max-speed max-speed
      :mass mass
-     :surface-area (:surface-area ball)}))
+     :surface-area (:surface-area ball)
+     :id id}))
 
 (defn update-state [{balls :balls earth :earth}]
-  {:balls (doall (map (fn [b] (update-ball b earth)) balls))
+  {:balls (doall (map (fn [ball] (update-ball ball balls earth)) balls))
    :earth earth})
 
 (defn draw-state [{balls :balls earth :earth}]
   (q/background 240)
-  (q/fill 220 30 30)
-  (doseq [ball balls]
-    (let [location (:location ball)
-          radius (:radius ball)]
-      (q/ellipse (:x location) (:y location) radius radius)))
   (q/fill 50 200 50)
   (q/ellipse 
     (get-in earth [:location :x])
     (get-in earth [:location :y])
     (:radius earth)
-    (:radius earth)))
+    (:radius earth))
+  (q/fill 220 30 30)
+  (doseq [ball balls]
+    (let [location (:location ball)
+          radius (:radius ball)]
+      (q/ellipse (:x location) (:y location) radius radius))))
 
 (defn -main [] 
   (q/defsketch gravity
