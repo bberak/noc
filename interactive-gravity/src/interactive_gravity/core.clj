@@ -54,10 +54,10 @@
         max-speed (:max-speed ball)
         gravitational-forces (conj 
                                (map 
-                                 (fn [other] (repel ball other 0.003)) 
+                                 (fn [other] (repel ball other 0.083)) 
                                  (filter (fn [other] (not= (:id ball) (:id other))) balls))
-                               (attract ball earth)
-                               (repel ball (get-mouse) 4.25))
+                               ;;(attract ball earth)
+                               (attract ball (get-mouse) 2.25))
         acceleration (v/divide (apply v/add gravitational-forces) mass)
         new-velocity (v/constrain-magnitude (v/add (:velocity ball) acceleration) max-speed)
         new-location (v/add (:location ball) new-velocity)
