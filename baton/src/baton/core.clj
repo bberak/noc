@@ -4,10 +4,20 @@
 
 (defn setup []
   (q/frame-rate 30)
-  {:angle 0})
+  {:angle 0
+   :angular-velocity 0
+   :angular-acceleration 0})
 
-(defn update-state [state]
-  {:angle (+ (:angle state) 0.1)})
+(defn limit [n min max]
+  (cond (< n min) min (> n max) max :else n))
+
+(defn update-state [{angle :angle velocity :angular-velocity acceleration :angular-acceleration}]
+  (let [new-acceleration (+ acceleration 0.0001)
+        new-velocity (limit (+ velocity new-acceleration) 0 0.75)
+        new-angle (+ angle new-velocity)]
+    {:angle new-angle
+     :angular-velocity new-velocity
+     :angular-acceleration new-acceleration}))
 
 (defn draw-state [state]
   (q/background 240)
