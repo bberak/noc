@@ -48,7 +48,7 @@
   {:x x :y y})
 
 (defn in-range? [n min max]
-  (and (> n min) (< n max)))
+  (and (>= n min) (<= n max)))
 
 (defn outside-range? [n min max]
   (not (in-range? n min max)))

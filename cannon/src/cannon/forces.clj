@@ -2,17 +2,21 @@
   (:require [cannon.vectors :as v]
             [quil.core :as q]))
 
-(defn drag [{velocity :velocity surface-area :surface-area} {drag-coefficient :drag-coefficient density :density}]
-  (let [speed (v/magnitude velocity)
-        normalized-velocity (v/normalize velocity)]
-    ;; Simplified drag model: (v/multiply normalized-velocity (* -1 (* drag-coefficient (q/sq speed))))
-    (v/multiply normalized-velocity (* (* (* -0.5 (* density (q/sq speed))) surface-area) drag-coefficient))))
+(defn drag [{velocity :velocity surface-area :surface-area location :location} {drag-coefficient :drag-coefficient density :density bounds :bounds}]
+  (if (or (or (nil? location) (nil? bounds)) (v/within-bounds? location (:x bounds) (:y bounds)))
+    (let [speed (v/magnitude velocity)
+          normalized-velocity (v/normalize velocity)]
+      ;; Simplified drag model: (v/multiply normalized-velocity (* -1 (* drag-coefficient (q/sq speed))))
+      (v/multiply normalized-velocity (* (* (* -0.5 (* density (q/sq speed))) surface-area) drag-coefficient)))
+    (v/create 0 0)))
 
 (defn friction 
   ([object material] (friction object material 1.0))
-  ([{velocity :velocity} {friction-coefficient :friction-coefficient} normal-magnitude]
-    (let [normalized-velocity (v/normalize velocity)]
-      (v/multiply normalized-velocity (* -1 normal-magnitude friction-coefficient)))))
+  ([{velocity :velocity location :location} {friction-coefficient :friction-coefficient bounds :bounds} normal-magnitude]
+    (if (or (or (nil? location) (nil? bounds)) (v/within-bounds? location (:x bounds) (:y bounds)))
+      (let [normalized-velocity (v/normalize velocity)]
+        (v/multiply normalized-velocity (* -1 normal-magnitude friction-coefficient)))
+      (v/create 0 0))))
 
 (defn constrain [val min max]
   (cond (< val min) min (> val max) max :else val))
@@ -20,7 +24,7 @@
 (defn attract
   ([obj-1 obj-2] (attract obj-1 obj-2 1.0))
   ([obj-1 obj-2 gravity]
-    ;;) F = G * m1 * m2 / dist-squared * direction-vector
+    ;; F = G * m1 * m2 / dist-squared * direction-vector
     (let [dir (v/subtract (:location obj-2) (:location obj-1))
           dist (v/magnitude dir)
           dir-normalized (v/normalize dir)]
@@ -29,15 +33,3 @@
 (defn repel
   ([obj-1 obj-2] (repel obj-1 obj-2 1.0))
   ([obj-1 obj-2 gravity] (v/multiply (attract obj-1 obj-2 gravity) -1)))
-
-
-
-
-
-
-
-
-
-
-
-

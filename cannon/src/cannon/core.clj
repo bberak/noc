@@ -15,14 +15,12 @@
      (create-ball x-velocity y-velocity)))
   ([x-velocity y-velocity]
     (let [mass 4]
-      {:location (v/create 0 (q/height))
+      {:location (v/create 0 (dec (q/height)))
        :velocity (v/create x-velocity y-velocity)
        :mass mass
        :side (* mass 10)
        :surface-area mass
-       :angle 0
-       :angular-velocity 0
-       :angular-acceleration 0})))
+       :angle 0})))
 
 (defn setup []
   (q/frame-rate 60)
@@ -30,17 +28,26 @@
    :mouse-pressed false
    :forces {:gravity (v/create 0 8.7)
             :air {:density 0.1
-                  :drag-coefficient 0.01}}})
+                  :drag-coefficient 0.01}
+            :floor {:bounds {:x {:min 0 :max (q/width)} 
+                             :y {:min (dec (q/height)) :max (q/height)}}
+                    :friction-coefficient 0.1}}})
 
 (defn update-ball [ball forces]
   (let [mass (:mass ball)
-        acceleration (v/divide (v/add (:gravity forces) (f/drag ball (:air forces))) mass)
+        acceleration (v/divide (v/add 
+                                 (:gravity forces) 
+                                 (f/drag ball (:air forces))
+                                 (f/friction ball (:floor forces))) mass)
         new-velocity (v/constrain-magnitude (v/add acceleration (:velocity ball)) max-speed)
         new-location (v/add new-velocity (:location ball))
-        bounce-results (v/bounce new-location new-velocity)]
+        bounce-results (v/bounce new-location new-velocity)
+        angular-velocity (/ (:x new-velocity) 50)
+        new-angle (+ angular-velocity (:angle ball))]
   (assoc ball 
            :location (:location bounce-results)
-           :velocity (:velocity bounce-results))))
+           :velocity (:velocity bounce-results)
+           :angle new-angle)))
 
 (defn update-state [{balls :balls forces :forces mouse-pressed :mouse-pressed}]
   (let [updated-balls (doall (map (fn [b] (update-ball b forces)) balls))
@@ -54,9 +61,9 @@
   (q/fill 0 255 255)
   (q/rect-mode :center)
   (doseq [ball balls]
-    (q/with-translation [(get-in ball [:location :x]) (get-in ball [:location :y])]       
-      (q/rotate (:angle ball))
-      (q/rect 0 0 (:side ball) (:side ball)))))
+    (q/with-translation [(get-in ball [:location :x]) (get-in ball [:location :y])]
+      (q/with-rotation [(:angle ball)]       
+        (q/rect 0 0 (:side ball) (:side ball))))))
 
 (defn -main [] 
   (q/defsketch cannon
