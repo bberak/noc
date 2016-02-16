@@ -6,20 +6,28 @@
 
 (def max-speed 50)
 
-(defn create-ball []
-  (let [mass 4]
-    {:location (v/create 0 (q/height))
-     :velocity (v/create 32 -32)
-     :mass mass
-     :side (* mass 10)
-     :surface-area mass
-     :angle 0
-     :angular-velocity 0
-     :angular-acceleration 0}))
+(defn create-ball
+  ([]
+   (let [mouse-x (q/mouse-x)
+         mouse-y (q/mouse-y)
+         x-velocity (q/map-range mouse-x 0 (q/width) 0 max-speed)
+         y-velocity (q/map-range mouse-y (q/height) 0 0 max-speed)]
+     (create-ball x-velocity y-velocity)))
+  ([x-velocity y-velocity]
+    (let [mass 4]
+      {:location (v/create 0 (q/height))
+       :velocity (v/create x-velocity y-velocity)
+       :mass mass
+       :side (* mass 10)
+       :surface-area mass
+       :angle 0
+       :angular-velocity 0
+       :angular-acceleration 0})))
 
 (defn setup []
   (q/frame-rate 60)
   {:balls []
+   :mouse-pressed false
    :forces {:gravity (v/create 0 8.7)
             :air {:density 0.1
                   :drag-coefficient 0.01}}})
@@ -34,14 +42,12 @@
            :location (:location bounce-results)
            :velocity (:velocity bounce-results))))
 
-(defn append-ball [balls]
-  (if (q/mouse-pressed?)
-    (conj balls (create-ball))
-    balls))
-
-(defn update-state [{balls :balls forces :forces}]
-  {:balls (append-ball (doall (map (fn [b] (update-ball b forces)) balls)))
-   :forces forces})
+(defn update-state [{balls :balls forces :forces mouse-pressed :mouse-pressed}]
+  (let [updated-balls (doall (map (fn [b] (update-ball b forces)) balls))
+        clicked (and (true? mouse-pressed) (false? (q/mouse-pressed?)))]
+    {:balls (if (true? clicked) (conj updated-balls (create-ball)) updated-balls)
+     :mouse-pressed (q/mouse-pressed?) 
+     :forces forces}))
 
 (defn draw-state [{balls :balls}]
   (q/background 240)
