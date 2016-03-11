@@ -9,8 +9,9 @@
 
 (defn setup []
   (q/frame-rate 60)
+  (q/rect-mode :center)
   {:ground {:friction-coefficient 0.01}
-   :car {:location (v/create 300 300)
+   :car {:location (v/create 320 240)
          :velocity (v/create 0 0)
          :mass 5}})
 
@@ -80,17 +81,29 @@
     {:ground ground
      :car (assoc car :velocity new-velocity :location new-location)}))
 
+;; Implementing atan2 to solidify my knowledge
+(defn heading [{x :x y :y}]
+  (cond
+    (or (zero? x) (zero? y)) 0
+    ;;(and (> x 0) (zero? y))   (q/radians 0)
+    ;;(and (> y 0) (zero? x))   (q/radians 90)
+    ;;(and (< x 0) (zero? y))   (q/radians 180)
+    ;;(and (< y 0) (zero? x))   (q/radians 270)
+    (and (> x 0) (> y 0)) (let [opp y adj x] (q/atan (/ opp adj)))
+    (and (< x 0) (> y 0)) (let [opp x adj y] (+ (q/abs (q/atan (/ opp adj))) (q/radians 90)))
+    (and (< x 0) (< y 0)) (let [opp y adj x] (+ (q/abs (q/atan (/ opp adj))) (q/radians 180)))
+    :else                 (let [opp x adj y] (+ (q/abs (q/atan (/ opp adj))) (q/radians 270)))))
+
 (defn draw-state [{car :car}]
   (q/background 240)
   (q/fill 20 190 40)
   (let [x (get-in car [:location :x])
         y (get-in car [:location :y])
-        vel-x (get-in car [:velocity :x])
-        vel-y (get-in car [:velocity :y])
-        angle (q/atan2 vel-y vel-x)]
+        velocity (:velocity car)
+        angle (heading velocity)]
     (q/with-translation [x y]
       (q/with-rotation [angle]
-        (q/rect 0 0 20 10)))))
+        (q/rect 0 0 10 10)))))
 
 (defn -main []
   (q/defsketch car-sim
