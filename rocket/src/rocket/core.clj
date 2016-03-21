@@ -54,19 +54,24 @@
               :theta new-theta
               :mass mass
               :surface-area surface-area
-              :thrusting (zero? (v/magnitude thrust))}}))
+              :thrusting (> (v/magnitude thrust) 0)}}))
 
 (defn draw-state [{rocket :rocket}]
   (q/background 240)
-  (q/fill 220 40 40)
   (let [location (:location rocket)
         theta (:theta rocket)]
     (q/with-translation [(:x location) (:y location)]
       (q/with-rotation [theta]
+        (q/fill 180 40 240)
         (q/triangle -10 -10 -10 10 15 0)
+        (q/fill 40 140 200)
+        (q/ellipse 3 0 4 4)
+        (q/ellipse -4 0 4 4)
         (if (true? (:thrusting rocket))
-          true
-          true)))))
+          (let []
+            (q/fill 220 220 0)
+            (q/triangle -14 -9 -14 -3 -9 -6)
+            (q/triangle -14 9 -14 3 -9 6)))))))
 
 (defn -main []
   (q/defsketch rocket
