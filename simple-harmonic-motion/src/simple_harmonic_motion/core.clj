@@ -4,28 +4,34 @@
             [simple-harmonic-motion.vectors :as v]
             [simple-harmonic-motion.forces :as f]))
 
+(def two-pi (q/radians 360))
+(def period 120) ;; In frames
+(def speed 6) ;; Pixels per frame
+(def frequency (/ 1 period)) ;; Waves per frame
+(def wavelength (/ speed frequency)) ;; Pixels
+(def amplitude 80)
+
 (defn setup []
   (q/frame-rate 30)
-  {:color 0
-   :angle 0})
+  {:location (v/create 0 0)})
 
-(defn update-state [state]
-  {:color (mod (+ (:color state) 0.7) 255)
-   :angle (+ (:angle state) 0.1)})
+(defn update-state [{location :location}]
+  (let [frame-count (q/frame-count)
+        x (* frame-count speed)
+        y (* amplitude (q/sin (* two-pi (/ frame-count period))))]
+        {:location (v/create x y)}))
 
-(defn draw-state [state]
+(defn draw-state [{location :location}]
   (q/background 240)
-  (q/fill (:color state) 255 255)
-  (let [angle (:angle state)
-        x (* 150 (q/cos angle))
-        y (* 150 (q/sin angle))]
-    (q/with-translation [(/ (q/width) 2)
-                         (/ (q/height) 2)]
-      (q/ellipse x y 100 100))))
+  (q/fill 0 0 0)
+  (q/text (str "Period: " period " frames\nSpeed: " speed " pixels per frame\nFrequency: " frequency " waves per frame\nWavelength: " wavelength " pixels\nAmplitude: " amplitude) 10 50)
+  (q/fill 0 255 255)
+  (q/with-translation [0 (/ (q/height) 2)]
+    (q/ellipse (:x location) (:y location) 10 10)))
 
 (defn -main []
   (q/defsketch simple-harmonic-motion
-    :title "You spin my circle right round"
+    :title "Simple harmonic motion"
     :size [640 480]
     :setup setup
     :update update-state
