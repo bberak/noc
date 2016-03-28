@@ -5,8 +5,8 @@
             [simple-harmonic-motion.forces :as f]))
 
 (def two-pi (q/radians 360))
-(def period 120) ;; In frames
-(def speed 6) ;; Pixels per frame
+(def period 80) ;; In frames
+(def speed 2) ;; Pixels per frame
 (def frequency (/ 1 period)) ;; Waves per frame
 (def wavelength (/ speed frequency)) ;; Pixels
 (def amplitude 80)
@@ -24,9 +24,15 @@
 (defn draw-state [{location :location}]
   (q/background 240)
   (q/fill 0 0 0)
-  (q/text (str "Period: " period " frames\nSpeed: " speed " pixels per frame\nFrequency: " frequency " waves per frame\nWavelength: " wavelength " pixels\nAmplitude: " amplitude) 10 50)
+  (q/text (str 
+    "Period: " period " frames\n"
+    "Speed: " speed " pixels per frame\n"
+    "Frequency: " frequency " waves per frame\n"
+    "Wavelength: " wavelength " pixels\n"
+    "Amplitude: " amplitude) 10 50)
   (q/fill 0 255 255)
   (q/with-translation [0 (/ (q/height) 2)]
+    (q/line (:x location) 0 (:x location) (:y location))
     (q/ellipse (:x location) (:y location) 10 10)))
 
 (defn -main []
