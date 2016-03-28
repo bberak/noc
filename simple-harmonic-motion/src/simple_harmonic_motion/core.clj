@@ -10,22 +10,16 @@
 (def frequency (/ 1 period)) ;; Waves per frame
 (def wavelength (/ speed frequency)) ;; Pixels
 (def amplitude 80)
-(def samples-per-frame 6)
+(def samples-per-frame 1)
 
 (defn setup []
   (q/frame-rate 30)
-  {:samples []
-   :frame 0})
+  {:frame 1})
 
-(defn update-state [{samples :samples frame :frame}]
-  (let [start (* (dec frame) speed)
-        end (+ start speed)
-        sample-step (/ (- end start) samples-per-frame)
-        sample-range (range start end sample-step)]
-        {:samples (concat samples (map (fn [x] (v/create x (* amplitude (q/sin (* two-pi (/ x period)))))) sample-range))
-         :frame (inc frame)}))
+(defn update-state [{frame :frame}]
+  {:frame (inc frame)})
 
-(defn draw-state [{samples :samples}]
+(defn draw-state [{samples :samples frame :frame}]
   (q/background 240)
   (q/fill 0 0 0)
   (q/text (str 
@@ -35,10 +29,13 @@
     "Wavelength: " wavelength " pixels\n"
     "Amplitude: " amplitude "\n"
     "Samples: " samples-per-frame " samples per frame") 10 50)
-  (q/fill 0 255 255)
   (q/with-translation [0 (/ (q/height) 2)]
-    (doseq [sample samples]
-      (q/ellipse (:x sample) (:y sample) 10 10))))
+    (let [start 0
+          end (* frame speed)
+          steps (* frame samples-per-frame)
+          step-size (/ end steps)]
+      (doseq [x (range start end step-size)]
+        (q/point x (* amplitude (q/sin (* two-pi (/ (+ (* (/ x end) frame) frame) period)))))))))
 
 (defn -main []
   (q/defsketch simple-harmonic-motion
