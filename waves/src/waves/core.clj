@@ -2,7 +2,8 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [waves.vectors :as v]
-            [waves.forces :as f]))
+            [waves.forces :as f]
+            [waves.waves :as w]))
 
 (defn create-wave [angular-velocity amplitude speed y-offset]
   {:angular-velocity angular-velocity
@@ -14,7 +15,8 @@
 
 (defn setup []
   (q/frame-rate 60)
-  {:waves [(create-wave 0.06 40 0.5 80) (create-wave 0.02 100 0.16667 250) (create-wave 0.01 20 0.25 400)]})
+  {:waves [(create-wave 0.06 40 0.5 80) (create-wave 0.02 100 0.16667 250) (create-wave 0.01 20 0.25 400)]
+   :test-wave (w/new-sine-wave (v/create 200 200) 300 150 15 1.95 100)})
 
 (defn update-wave [w]
   (let [amplitude (:amplitude w)
@@ -28,17 +30,23 @@
                         (v/create x (* amplitude (q/sin a))))) 
                     (range 0 (q/width))))))
 
-(defn update-state [{waves :waves}]
-  {:waves (doall (map (fn [w] (update-wave w)) waves))})
+(defn update-state [{waves :waves test-wave :test-wave}]
+  {:waves (doall (map (fn [w] (update-wave w)) waves))
+   :test-wave (w/update-wave test-wave)})
 
-(defn draw-state [{waves :waves}]
+(defn draw-state [{waves :waves test-wave :test-wave}]
   (q/background 255)
   (doseq [w waves]
     (q/with-translation [0 (:y-offset w)]
       (q/begin-shape)
       (doseq [pt (:points w)]
         (q/vertex (:x pt) (:y pt)))
-      (q/end-shape))))
+      (q/end-shape)))
+  (q/with-translation [(get-in test-wave [:origin :x]) (get-in test-wave [:origin :y])]
+    (q/begin-shape)
+      (doseq [pt (:points test-wave)]
+        (q/vertex (:x pt) (:y pt)))
+      (q/end-shape)))
 
 (defn -main []
   (q/defsketch waves
