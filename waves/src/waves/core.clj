@@ -16,7 +16,7 @@
 (defn setup []
   (q/frame-rate 60)
   {:waves [(create-wave 0.06 40 0.5 80) (create-wave 0.02 100 0.16667 250) (create-wave 0.01 20 0.25 400)]
-   :test-wave (w/new-sine-wave (v/create 200 200) 300 150 15 1.95 100)})
+   :test-wave (w/sine-wave (v/create 200 200) 300 150 15 1.95 100 2.2)})
 
 (defn update-wave [w]
   (let [amplitude (:amplitude w)
@@ -42,11 +42,7 @@
       (doseq [pt (:points w)]
         (q/vertex (:x pt) (:y pt)))
       (q/end-shape)))
-  (q/with-translation [(get-in test-wave [:origin :x]) (get-in test-wave [:origin :y])]
-    (q/begin-shape)
-      (doseq [pt (:points test-wave)]
-        (q/vertex (:x pt) (:y pt)))
-      (q/end-shape)))
+  (w/render test-wave))
 
 (defn -main []
   (q/defsketch waves

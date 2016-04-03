@@ -4,7 +4,7 @@
 
 (def two-pi (q/radians 360))
 
-(defn new-wave [origin-vector width period amplitude speed num-points function]
+(defn wave [origin-vector width period amplitude speed num-points rotation function]
   {:origin origin-vector
    :period period
    :amplitude amplitude
@@ -14,10 +14,11 @@
    :theta 0
    :dx (/ width num-points)
    :points []
+   :rotation rotation
    :function function})
 
-(defn new-sine-wave [origin-vector width period amplitude speed num-points]
-  (new-wave origin-vector width period amplitude speed num-points (fn [amp theta period] (* amp (q/sin (* two-pi (/ theta period)))))))
+(defn sine-wave [origin-vector width period amplitude speed num-points rotation]
+  (wave origin-vector width period amplitude speed num-points rotation (fn [amp theta period] (* amp (q/sin (* two-pi (/ theta period)))))))
 
 (defn update-wave [wave]
   (let [theta (:theta wave)
@@ -33,3 +34,11 @@
                                  (v/create x y)))
                              (range 0 width dx))
       			:theta (+ theta speed))))
+
+(defn render [wave]
+  (q/with-translation [(get-in wave [:origin :x]) (get-in wave [:origin :y])]
+  	(q/with-rotation [(:rotation wave)]
+	  (q/begin-shape)
+        (doseq [pt (:points wave)]
+          (q/vertex (:x pt) (:y pt)))
+        (q/end-shape))))
