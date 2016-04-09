@@ -7,10 +7,17 @@
 
 (defn setup []
   (q/frame-rate 60)
-  {:waves [(assoc (w/sine-wave (v/create 50 100) 400 150 15 1.95 25 0) :render w/render)
-           (assoc (w/cosine-wave (v/create 50 400) 400 250 30 0.95 20 -0.5) :render #(w/render-ellipses % 50 50 50 50 50 120))
-           (assoc (w/cosine-wave (v/create 350 400) 400 250 30 0.95 5 -0.25) :render #(w/render-rects % 50 50 50 50 50 120))
-           (assoc (w/cosine-wave (v/create 300 100) 400 250 45 0.95 20 0) :render #(w/render-rects-with-heading % 40 40 50 50 50 120))
+  {:waves [;;(assoc (w/sine-wave (v/create 50 100) 400 150 15 1.95 25 0) :render w/render)
+           ;;(assoc (w/cosine-wave (v/create 50 400) 400 250 30 0.95 20 -0.5) :render #(w/render-ellipses % 50 50 50 50 50 120))
+           ;;(assoc (w/cosine-wave (v/create 350 400) 400 250 30 0.95 5 -0.25) :render #(w/render-rects % 50 50 50 50 50 120))
+           ;;(assoc (w/cosine-wave (v/create 300 100) 400 250 45 0.95 20 0) :render #(w/render-rects-with-heading % 40 40 50 50 50 120))        
+           (assoc (w/add 
+             (w/sine-wave (v/create 0 0) 100 500 15 0.05 15 0)
+             (w/cosine-wave (v/create 0 0) 10 2 3 0.05 10 0)
+             (w/sine-wave (v/create 0 0) 50 15 5 0.05 15 0)
+             (w/cosine-wave (v/create 0 0) 40 20 3 0.05 10 0)
+             (w/sine-wave (v/create 50 200) 100 10 15 0.05 15 0))
+             :render #(w/render-ellipses % 50 50 50 50 50 120))
            ]})
 
 (defn update-state [{waves :waves}]

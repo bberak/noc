@@ -23,6 +23,26 @@
 (defn cosine-wave [origin-vector width period amplitude speed num-points rotation]
   (wave origin-vector width period amplitude speed num-points rotation (fn [amp theta period] (* amp (q/cos (* two-pi (/ theta period)))))))
 
+(defn add [& waves]
+  (reduce (fn [w1 w2]
+            (let [new-width (+ (:width w1) (:width w2))
+                  new-num-points (+ (:num-points w1) (:num-points w2))]
+            {:origin (v/add (:origin w1) (:origin w2))
+             :period (+ (:period w1) (:period w2))
+             :amplitude (+ (:amplitude w1) (:amplitude w2))
+             :speed (+ (:speed w1) (:speed w2))
+             :width new-width
+             :num-points new-num-points
+             :theta (+ (:theta w1) (:theta w2))
+             :dx (/ new-width new-num-points)
+             :points []
+             :rotation (+ (:rotation w1) (:rotation w2))
+             :function (fn [amp theta period]
+                         (let [f1 (:function w1)
+                               f2 (:function w2)]
+                           (+ (f1 amp theta period) (f2 amp theta period))))}))
+          waves))
+
 (defn update-wave [wave]
   (let [theta (:theta wave)
         amplitude (:amplitude wave)
