@@ -20,7 +20,8 @@
         velocity (v/multiply (v/multiply (v/normalize location) speed) -1)]
     {:location location
      :velocity velocity
-     :mass mass}))
+     :mass mass
+     :drag-coefficient (* 0.001 mass)}))
 
 (defn setup []
   (q/frame-rate 60)
@@ -48,8 +49,10 @@
         normal-force (:normal-force plane)
         friction-coefficient (:friction-coefficient plane)
         friction (v/multiply (v/cross n-velocity normal-force) (* -1 friction-coefficient))
-        drag ()
-        forces (v/add gravity friction)
+        drag-coefficient (:drag-coefficient box)
+        speed (v/magnitude velocity)
+        drag (v/multiply n-velocity (* -1 speed speed drag-coefficient))
+        forces (v/add gravity friction drag)
         acceleration (v/divide forces mass)
         new-velocity (v/add velocity acceleration)
         new-location (v/add location new-velocity)]
