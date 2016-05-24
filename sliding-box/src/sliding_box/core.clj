@@ -4,9 +4,17 @@
             [sliding-box.vectors :as v]
             [sliding-box.forces :as f]))
 
+(defn create-plane [theta friction-coefficient gravity]
+  (let [hyp (v/magnitude gravity)
+        x (* hyp (q/sin theta))
+        y (* hyp (q/cos theta))]
+    {:theta theta
+     :friction-coefficient friction-coefficient
+     :normal-force (v/create (- x) y)}))
+
 (defn create-box [plane mass speed]
   (let [theta (:theta plane)
-        x (- (q/width) mass)
+        x (q/width)
         y (* x (q/tan theta))
         location (v/create x y)
         velocity (v/multiply (v/multiply (v/normalize location) speed) -1)]
@@ -15,15 +23,39 @@
      :mass mass}))
 
 (defn setup []
-  (q/frame-rate 30)
-  (let [plane  {:theta (q/radians 30)
-                :friction-coefficient 0.5}]
+  (q/frame-rate 60)
+  (let [gravity (v/create 0 -1)
+        theta (q/radians 30)
+        plane (create-plane theta 0.5 gravity)]
     {:plane plane
-     :box (create-box plane 20 3)
-     :gravity (v/create 0 -1)}))
+     :box (create-box plane 20 1.5)
+     :gravity gravity}))
 
-(defn update-state [state]
-  state)
+(defn keep-location-outside-plane [location plane]
+  (let [plane-theta (:theta plane)
+        x (:x location)
+        y (:y location)
+        location-theta (q/atan2 y x)]
+    (if (< location-theta plane-theta)
+      (v/create x (* x (q/tan plane-theta)))
+      location)))
+
+(defn update-state [{plane :plane box :box gravity :gravity}]
+  (let [location (:location box)
+        mass (:mass box)
+        velocity (:velocity box)
+        n-velocity (v/normalize velocity)
+        normal-force (:normal-force plane)
+        friction-coefficient (:friction-coefficient plane)
+        friction (v/multiply (v/cross n-velocity normal-force) (* -1 friction-coefficient))
+        drag ()
+        forces (v/add gravity friction)
+        acceleration (v/divide forces mass)
+        new-velocity (v/add velocity acceleration)
+        new-location (v/add location new-velocity)]
+    {:plane plane
+     :box (assoc box :velocity new-velocity :location (keep-location-outside-plane  new-location plane))
+     :gravity gravity}))
 
 (defn render-plane [plane]
   (let [x1 0

@@ -34,7 +34,7 @@
 (defn attract
   ([obj-1 obj-2] (attract obj-1 obj-2 1.0))
   ([obj-1 obj-2 gravity]
-    ;;) F = G * m1 * m2 / dist-squared * direction-vector
+    ;; F = G * m1 * m2 / dist-squared * direction-vector
     (let [dir (v/subtract (:location obj-2) (:location obj-1))
           dist (v/magnitude dir)
           dir-normalized (v/normalize dir)]

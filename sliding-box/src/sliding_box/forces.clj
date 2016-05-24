@@ -6,17 +6,15 @@
   (if (or (or (nil? location) (nil? bounds)) (v/within-bounds? location (:x bounds) (:y bounds)))
     (let [speed (v/magnitude velocity)
           normalized-velocity (v/normalize velocity)]
-      ;; Simplified drag model: (v/multiply normalized-velocity (* -1 (* drag-coefficient (q/sq speed))))
-      (v/multiply normalized-velocity (* (* (* -0.5 (* density (q/sq speed))) surface-area) drag-coefficient)))
+      ;; Simplified drag model: (v/multiply normalized-velocity (* -1 drag-coefficient (q/sq speed)))
+      (v/multiply normalized-velocity (* -0.5 density (q/sq speed) surface-area drag-coefficient)))
     (v/create 0 0)))
 
-(defn friction 
-  ([object material] (friction object material 1.0))
-  ([{velocity :velocity location :location} {friction-coefficient :friction-coefficient bounds :bounds} normal-magnitude]
-    (if (or (or (nil? location) (nil? bounds)) (v/within-bounds? location (:x bounds) (:y bounds)))
-      (let [normalized-velocity (v/normalize velocity)]
-        (v/multiply normalized-velocity (* -1 normal-magnitude friction-coefficient)))
-      (v/create 0 0))))
+(defn friction [{velocity :velocity location :location} {friction-coefficient :friction-coefficient bounds :bounds} normal-force]
+  (if (or (or (nil? location) (nil? bounds)) (v/within-bounds? location (:x bounds) (:y bounds)))
+    (let [normalized-velocity (v/normalize velocity)]
+      (v/multiply (v/cross normal-force normalized-velocity) (* -1 friction-coefficient)))
+    (v/create 0 0)))
 
 (defn constrain [val min max]
   (cond (< val min) min (> val max) max :else val))
