@@ -17,17 +17,17 @@
         x (q/width)
         y (* x (q/tan theta))
         location (v/create x y)
-        velocity (v/multiply (v/multiply (v/normalize location) speed) -1)]
+        velocity (v/multiply (v/normalize (v/create (- (q/width)) (- (q/height)))) speed)]
     {:location location
      :velocity velocity
      :mass mass
-     :drag-coefficient (* 0.001 mass)}))
+     :drag-coefficient (* 0.0001 mass)}))
 
 (defn setup []
   (q/frame-rate 60)
   (let [gravity (v/create 0 -1)
         theta (q/radians 30)
-        plane (create-plane theta 0.5 gravity)]
+        plane (create-plane theta -0.5 gravity)]
     {:plane plane
      :box (create-box plane 20 1.5)
      :gravity gravity}))
@@ -52,7 +52,7 @@
         drag-coefficient (:drag-coefficient box)
         speed (v/magnitude velocity)
         drag (v/multiply n-velocity (* -1 speed speed drag-coefficient))
-        forces (v/add gravity friction drag)
+        forces (v/add gravity friction) ;; (v/add gravity friction drag)
         acceleration (v/divide forces mass)
         new-velocity (v/add velocity acceleration)
         new-location (v/add location new-velocity)]
