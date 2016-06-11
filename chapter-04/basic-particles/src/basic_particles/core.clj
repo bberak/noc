@@ -1,7 +1,7 @@
 (ns basic-particles.core
   (:require [quil.core :as q]
             [quil.middleware :as m]
-            [basic-particles.particles :as p]))
+            [basic-particles.particle :as p]))
 
 (defn setup []
   (q/frame-rate 30)
@@ -9,7 +9,6 @@
    :angle 0})
 
 (defn update-state [state]
-  (p/run)
   {:color (mod (+ (:color state) 0.7) 255)
    :angle (+ (:angle state) 0.1)})
 

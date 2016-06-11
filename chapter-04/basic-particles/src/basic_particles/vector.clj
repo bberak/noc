@@ -1,13 +1,6 @@
-(ns basic-particles.vectors
-  (:require [quil.core :as q]))
-
-(defprotocol IVectorOperations
-  (multiply [v n])
-  (divide [v n])
-  (add [v1 v2])
-  (subtract [v1 v2])
-  (magnitude [v])
-  (normalize [v]))
+(ns basic-particles.vector
+  (:require [quil.core :as q]
+            [basic-particles.protocols :refer :all]))
 
 (defrecord Vector [x y]
   IVectorOperations
