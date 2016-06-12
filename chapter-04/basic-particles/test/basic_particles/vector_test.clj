@@ -1,6 +1,6 @@
 (ns basic-particles.vector-test
   (:require [clojure.test :refer :all]
-            [basic-particles.protocols :refer :all]
+            [basic-particles.protocols.vector-operations :refer :all]
             [basic-particles.vector])
   (:import [basic_particles.vector Vector]))
 

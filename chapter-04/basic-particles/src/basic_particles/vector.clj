@@ -1,9 +1,9 @@
 (ns basic-particles.vector
   (:require [quil.core :as q]
-            [basic-particles.protocols :refer :all]))
+            [basic-particles.protocols.vector-operations :refer :all]))
 
 (defrecord Vector [x y]
-  IVectorOperations
+  VectorOperations
   (multiply [v n]
   	(Vector. (* x n) (* y n)))
   (divide [v n]
