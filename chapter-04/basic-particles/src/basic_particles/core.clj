@@ -8,19 +8,15 @@
            [basic_particles.vector Vector]))
 
 (defn setup []
-  (q/frame-rate 30)
-  {:particle (Particle. 
-               (Vector. 0 0)
-               (Vector. 0 0)
-               (Vector. 0 0)
-               0)})
+  (q/frame-rate 60)
+  {:particles [(Particle. (Vector. (/ (q/width) 2) 100) (Vector. -0.59 -2.27) (Vector. 0 0.05) 255)]})
 
-(defn update-state [{particle :particle}]
-  {:particle (update-particle particle)})
+(defn update-state [{particles :particles}]
+  {:particles (filter is-alive? (map update-particle particles))})
 
-(defn draw-state [state]
+(defn draw-state [{particles :particles}]
   (q/background 240)
-  (q/fill 70 255 255))
+  (doseq [p particles] (render p)))
 
 (defn -main []
   (q/defsketch basic-particles
