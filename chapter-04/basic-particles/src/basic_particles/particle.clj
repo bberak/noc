@@ -5,15 +5,16 @@
             [basic-particles.protocols.vector-operations :refer :all])
   (:import [basic_particles.vector Vector]))
 
-(defrecord Particle [location velocity acceleration lifespan]
+(defrecord Particle [location velocity lifespan]
   
   ParticleOperations
   
-  (update-particle [p]
+  (update-particle [p [& forces]]
   	(let [new-lifespan (- lifespan 2)
+          acceleration (reduce add forces)
           new-velocity (add velocity acceleration)
           new-location (add location new-velocity)]
-     (Particle. new-location new-velocity acceleration new-lifespan)))
+     (Particle. new-location new-velocity new-lifespan)))
   
   (render [p]
   	(q/stroke 0 lifespan)
