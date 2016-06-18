@@ -7,14 +7,17 @@
   (:import [basic_particles.particle Particle]
            [basic_particles.vector Vector]))
 
+(defn create-particle []
+  (Particle. (Vector. (/ (q/width) 2) 100) (Vector. (q/random -1 1) (q/random -7 0)) 255 0))
+
 (defn setup []
   (q/frame-rate 60)
-  {:particles [(Particle. (Vector. (/ (q/width) 2) 100) (Vector. -0.79 -7.27) 255 0)]
+  {:particles []
    :gravity (Vector. 0 0.275)
-   :wind (Vector. -0.04 0.015)})
+   :wind (Vector. -0.08 0.015)})
 
 (defn update-state [{particles :particles gravity :gravity wind :wind}]
-  {:particles (filter is-alive? (map (fn [p] (update-particle p [gravity wind])) particles))
+  {:particles (conj (filter is-alive? (map (fn [p] (update-particle p [gravity wind])) particles)) (create-particle))
    :gravity gravity
    :wind wind})
 
