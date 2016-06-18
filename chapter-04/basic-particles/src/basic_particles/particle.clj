@@ -5,7 +5,7 @@
             [basic-particles.protocols.vector-operations :refer :all])
   (:import [basic_particles.vector Vector]))
 
-(defrecord Particle [location velocity lifespan]
+(defrecord Particle [location velocity lifespan angle]
   
   ParticleOperations
   
@@ -13,13 +13,18 @@
   	(let [new-lifespan (- lifespan 2)
           acceleration (reduce add forces)
           new-velocity (add velocity acceleration)
-          new-location (add location new-velocity)]
-     (Particle. new-location new-velocity new-lifespan)))
+          new-location (add location new-velocity)
+          angular-velocity (/ (:x new-velocity) 10)
+          new-angle (+ angle angular-velocity)]
+     (Particle. new-location new-velocity new-lifespan new-angle)))
   
   (render [p]
   	(q/stroke 0 lifespan)
+    (q/rect-mode :center)
    	(q/fill 175 lifespan)
-    (q/ellipse (:x location) (:y location) 8 8))
+    (q/with-translation [(:x location) (:y location)]
+      (q/with-rotation [angle]
+        (q/rect 0 0 8 8))))
   
   (is-alive? [p]
   	(> lifespan 0)))

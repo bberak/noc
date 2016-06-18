@@ -9,7 +9,7 @@
 
 (defn setup []
   (q/frame-rate 60)
-  {:particles [(Particle. (Vector. (/ (q/width) 2) 100) (Vector. -0.79 -7.27) 255)]
+  {:particles [(Particle. (Vector. (/ (q/width) 2) 100) (Vector. -0.79 -7.27) 255 0)]
    :gravity (Vector. 0 0.275)
    :wind (Vector. -0.04 0.015)})
 
