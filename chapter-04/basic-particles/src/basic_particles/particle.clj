@@ -1,9 +1,7 @@
 (ns basic-particles.particle
   (:require [quil.core :as q]
-            [basic-particles.vector :as v]
             [basic-particles.protocols.particle-operations :refer :all]
-            [basic-particles.protocols.vector-operations :refer :all])
-  (:import [basic_particles.vector Vector]))
+            [basic-particles.protocols.vector-operations :refer :all]))
 
 (defrecord Particle [location velocity lifespan angle]
   
@@ -18,7 +16,7 @@
           new-angle (+ angle angular-velocity)]
      (Particle. new-location new-velocity new-lifespan new-angle)))
   
-  (render [p]
+  (render-particle [p]
   	(q/stroke 0 lifespan)
     (q/rect-mode :center)
    	(q/fill 175 lifespan)

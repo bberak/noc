@@ -2,5 +2,5 @@
 
 (defprotocol ParticleOperations
   (update-particle [p [& forces]])
-  (render [p])
+  (render-particle [p])
   (is-alive? [p]))
