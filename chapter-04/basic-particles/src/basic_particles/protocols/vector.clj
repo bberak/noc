@@ -1,6 +1,6 @@
-(ns basic-particles.protocols.vector-operations)
+(ns basic-particles.protocols.vector)
 
-(defprotocol VectorOperations
+(defprotocol Vector
   (multiply [v n])
   (divide [v n])
   (add [v1 v2])

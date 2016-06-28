@@ -1,6 +1,6 @@
-(ns basic-particles.protocols.particle-system-operations)
+(ns basic-particles.protocols.particle-system)
 
-(defprotocol ParticleSystemOperations
+(defprotocol ParticleSystem
   (update-particles [ps [& forces]])
   (add-particles [ps [& new-particles]])
   (render-system [ps]))
