@@ -1,6 +1,6 @@
 /target
 /classes
-/checkouts
+/checkouts/*
 !/checkouts/basic-particles
 pom.xml
 pom.xml.asc
