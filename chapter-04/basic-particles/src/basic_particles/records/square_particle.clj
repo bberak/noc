@@ -1,5 +1,6 @@
 (ns basic-particles.records.square-particle
   (:require [quil.core :as q]
+            [basic-particles.records.vector2d :refer :all]
             [basic-particles.protocols.particle :refer :all]
             [basic-particles.protocols.vector :refer :all]))
 
@@ -9,7 +10,7 @@
   
   (update-particle [p [& forces]]
   	(let [new-lifespan (- lifespan 2)
-          acceleration (reduce add forces)
+          acceleration (reduce add (->Vector2D 0 0) forces)
           new-velocity (add velocity acceleration)
           new-location (add location new-velocity)
           angular-velocity (/ (:x new-velocity) 10)
