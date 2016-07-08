@@ -42,12 +42,12 @@
         :else 0))
     0))
 
-(defn update-booster [booster location velocity is-thrusting x-factor y-factor]
+(defn update-booster [booster location velocity is-thrusting theta-offset]
   (let [location2D (->Vector2D (:x location) (:y location))
         opp-velocity (multiply (->Vector2D (:x velocity) (:y velocity)) -1)
-        theta (q/atan2 (:y velocity) (:x velocity))
-        x (* (* 5 (q/sin theta)) x-factor)
-        y (* (* 5 (q/cos theta)) y-factor)
+        theta (+ (q/atan2 (:y velocity) (:x velocity)) theta-offset)
+        x (* 25 (q/cos theta))
+        y (* 25 (q/sin theta))
         booster-location (add location2D (->Vector2D x y))
         updated-booster (-> booster 
                            (update-particles [])
@@ -77,8 +77,8 @@
               :mass mass
               :surface-area surface-area
               :thrusting is-thrusting
-              :left-booster (update-booster (:left-booster rocket) new-location new-velocity is-thrusting 1 -1)
-              :right-booster (update-booster (:right-booster rocket) new-location new-velocity is-thrusting -1 1)}}))
+              :left-booster (update-booster (:left-booster rocket) new-location new-velocity is-thrusting (q/radians -165))
+              :right-booster (update-booster (:right-booster rocket) new-location new-velocity is-thrusting (q/radians 165))}}))
 
 (defn draw-state [{rocket :rocket}]
   (let [location (:location rocket)
