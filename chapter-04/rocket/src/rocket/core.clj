@@ -5,7 +5,7 @@
             [basic-particles.records.basic-particle-system :refer :all]
             [basic-particles.protocols.particle-system :refer :all]
             [basic-particles.records.vector2d :refer :all]
-            [basic-particles.records.square-particle :refer :all]
+            [rocket.smoke :refer :all]
             [basic-particles.protocols.vector :refer :all]
             [rocket.forces :as f]))
 
@@ -52,7 +52,7 @@
         updated-booster (-> booster 
                            (update-particles [])
                            (#(if (true? is-thrusting)
-                               (add-particles % [(->SquareParticle booster-location (multiply opp-velocity 0.3) 75 0)])
+                               (add-particles % [(->Smoke booster-location (multiply opp-velocity 0.3) 75 0)])
                                %)))]
     updated-booster))
 
