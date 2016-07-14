@@ -18,11 +18,11 @@
      (Smoke. new-location new-velocity new-lifespan new-angle)))
   
   (render-particle [p]
-  	(q/stroke 3)
-   	(q/fill 175 lifespan)
+    (q/fill 175 lifespan)	
+    (q/stroke 3 lifespan)
     (q/with-translation [(:x location) (:y location)]
       (q/with-rotation [angle]
-        (let [radius (* 80 (/ 1 lifespan))]
+        (let [radius (* 40 (/ (- 75 lifespan) 75))]
           (q/ellipse 0 0 radius radius)))))
   
   (is-alive? [p]
