@@ -7,7 +7,7 @@
   
   Particle
   
-  (update-particle [p [& forces]]
+  (step [p [& forces]]
   	(let [new-lifespan (- lifespan (* 2 speed))
           acceleration (multiply (reduce add forces) speed)
           new-velocity (add velocity acceleration)
@@ -16,7 +16,7 @@
           new-angle (+ angle angular-velocity)]
      (TriangularParticle. new-location new-velocity new-lifespan new-angle speed)))
   
-  (render-particle [p]
+  (render [p]
   	(q/stroke 0 lifespan)
     (q/rect-mode :center)
    	(q/fill 175 lifespan)

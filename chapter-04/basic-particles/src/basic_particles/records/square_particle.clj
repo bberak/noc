@@ -8,7 +8,7 @@
   
   Particle
   
-  (update-particle [p [& forces]]
+  (step [p [& forces]]
   	(let [new-lifespan (- lifespan 2)
           acceleration (reduce add (->Vector2D 0 0) forces)
           new-velocity (add velocity acceleration)
@@ -17,7 +17,7 @@
           new-angle (+ angle angular-velocity)]
      (SquareParticle. new-location new-velocity new-lifespan new-angle)))
   
-  (render-particle [p]
+  (render [p]
   	(q/stroke 0 lifespan)
     (q/rect-mode :center)
    	(q/fill 175 lifespan)

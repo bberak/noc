@@ -1,6 +1,6 @@
 (ns basic-particles.protocols.particle)
 
 (defprotocol Particle
-  (update-particle [p [& forces]])
-  (render-particle [p])
+  (step [p [& forces]])
+  (render [p])
   (is-alive? [p]))

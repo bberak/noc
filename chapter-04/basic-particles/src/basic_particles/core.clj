@@ -5,8 +5,11 @@
             [basic-particles.records.vector2d :refer :all]
             [basic-particles.records.square-particle :refer :all]
             [basic-particles.records.triangular-particle :refer :all]
-            [basic-particles.protocols.particle-system :refer :all]
-            [basic-particles.protocols.vector :refer :all]))
+            [basic-particles.protocols.particle-list :as pl]
+            [basic-particles.protocols.particle :as p]
+            [basic-particles.protocols.vector :as v]
+            
+            ))
 
 (defn setup []
   (q/frame-rate 60)
@@ -16,19 +19,19 @@
 
 (defn create-triangular-particle []
   (let [speed (if (q/mouse-pressed?) 0.25 1)]
-    (->TriangularParticle (->Vector2D (q/mouse-x) (q/mouse-y)) (multiply (->Vector2D (q/random -1 1) (q/random -7 0)) speed) 255 0 speed)))
+    (->TriangularParticle (->Vector2D (q/mouse-x) (q/mouse-y)) (v/multiply (->Vector2D (q/random -1 1) (q/random -7 0)) speed) 255 0 speed)))
 
 (defn update-state [{particle-system :particle-system gravity :gravity wind :wind}]
   (let [updated-system (-> particle-system 
-                           (update-particles [gravity wind])
-                           (add-particles [(create-triangular-particle)]))]
+                           (p/step [gravity wind])
+                           (pl/append [(create-triangular-particle)]))]
     {:particle-system updated-system
      :gravity gravity
      :wind wind}))
 
 (defn draw-state [{particle-system :particle-system}]
   (q/background 240)
-  (render-system particle-system))
+  (p/render particle-system))
 
 (defn -main []
   (q/defsketch basic-particles
