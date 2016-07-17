@@ -44,15 +44,18 @@
 
 (defn update-booster [booster location velocity is-thrusting theta-offset]
   (let [location2D (->Vector2D (:x location) (:y location))
-        opp-velocity (multiply (->Vector2D (:x velocity) (:y velocity)) -1)
+        velocity2D (->Vector2D (:x velocity) (:y velocity))
+        velocity-mag (magnitude velocity2D)
+        opp-velocity (multiply velocity2D  -1)
         theta (+ (q/atan2 (:y velocity) (:x velocity)) theta-offset)
         x (* 25 (q/cos theta))
         y (* 25 (q/sin theta))
+        variance (* (* 40 (q/random 0 1)) (q/map-range velocity-mag 0 3 1 0.05))
         booster-location (add location2D (->Vector2D x y))
         updated-booster (-> booster 
                            (update-particles [])
                            (#(if (true? is-thrusting)
-                               (add-particles % [(->Smoke booster-location (multiply opp-velocity 0.3) 75 0)])
+                               (add-particles % [(->Smoke booster-location (multiply opp-velocity 0.3) 75 0 variance)])
                                %)))]
     updated-booster))
 

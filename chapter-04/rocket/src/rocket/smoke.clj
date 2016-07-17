@@ -4,7 +4,7 @@
             [basic-particles.protocols.particle :refer :all]
             [basic-particles.protocols.vector :refer :all]))
 
-(defrecord Smoke [location velocity lifespan angle]
+(defrecord Smoke [location velocity lifespan angle variance]
   
   Particle
   
@@ -15,15 +15,15 @@
           new-location (add location new-velocity)
           angular-velocity (/ (:x new-velocity) 10)
           new-angle (+ angle angular-velocity)]
-     (Smoke. new-location new-velocity new-lifespan new-angle)))
+     (Smoke. new-location new-velocity new-lifespan new-angle variance)))
   
   (render-particle [p]
     (q/fill 175 lifespan)	
     (q/stroke 3 lifespan)
     (q/with-translation [(:x location) (:y location)]
       (q/with-rotation [angle]
-        (let [radius (* 40 (/ (- 75 lifespan) 75))]
-          (q/ellipse 0 0 radius radius)))))
+        (let [radius (* 40 (q/norm lifespan 75 0))]
+          (q/ellipse 0 0 (+ variance radius) (+ variance radius))))))
   
   (is-alive? [p]
   	(> lifespan 0)))
