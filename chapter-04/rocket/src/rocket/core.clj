@@ -3,10 +3,11 @@
             [quil.middleware :as m]
             [rocket.vectors :as v]
             [basic-particles.records.basic-particle-system :refer :all]
-            [basic-particles.protocols.particle-system :refer :all]
+            [basic-particles.protocols.particle-list :as pl]
+            [basic-particles.protocols.particle :as p]
             [basic-particles.records.vector2d :refer :all]
             [rocket.smoke :refer :all]
-            [basic-particles.protocols.vector :refer :all]
+            [basic-particles.protocols.vector :as v2]
             [rocket.forces :as f]))
 
 (def max-speed 3)
@@ -45,17 +46,17 @@
 (defn update-booster [booster location velocity is-thrusting theta-offset]
   (let [location2D (->Vector2D (:x location) (:y location))
         velocity2D (->Vector2D (:x velocity) (:y velocity))
-        velocity-mag (magnitude velocity2D)
-        opp-velocity (multiply velocity2D  -1)
+        velocity-mag (v2/magnitude velocity2D)
+        opp-velocity (v2/multiply velocity2D  -1)
         theta (+ (q/atan2 (:y velocity) (:x velocity)) theta-offset)
         x (* 25 (q/cos theta))
         y (* 25 (q/sin theta))
         variance (* (* 40 (q/random 0 1)) (q/map-range velocity-mag 0 3 1 0.05))
-        booster-location (add location2D (->Vector2D x y))
+        booster-location (v2/add location2D (->Vector2D x y))
         updated-booster (-> booster 
-                           (update-particles [])
+                           (p/step [])
                            (#(if (true? is-thrusting)
-                               (add-particles % [(->Smoke booster-location (multiply opp-velocity 0.3) 75 0 variance)])
+                               (pl/append % [(->Smoke booster-location (v2/multiply opp-velocity 0.3) 75 0 variance)])
                                %)))]
     updated-booster))
 
@@ -87,8 +88,8 @@
   (let [location (:location rocket)
         theta (:theta rocket)]
     (q/background 40)
-    (render-system (:left-booster rocket))
-    (render-system (:right-booster rocket))
+    (p/render (:left-booster rocket))
+    (p/render (:right-booster rocket))
     (q/with-translation [(:x location) (:y location)]
       (q/with-rotation [theta]
         (q/fill 180 40 240)
