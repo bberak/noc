@@ -19,7 +19,7 @@
 
 (defn create-triangular-particle []
   (let [speed (if (q/mouse-pressed?) 0.25 1)]
-    (->TriangularParticle (->Vector2D (q/mouse-x) (q/mouse-y)) (v/multiply (->Vector2D (q/random -1 1) (q/random -7 0)) speed) 255 0 speed)))
+    (->TriangularParticle (->Vector2D (q/mouse-x) (q/mouse-y)) (v/multiply (->Vector2D (q/random -1 1) (q/random -7 0)) speed) 255 0 speed 1)))
 
 (defn update-state [{particle-system :particle-system gravity :gravity wind :wind}]
   (let [updated-system (-> particle-system 

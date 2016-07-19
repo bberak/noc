@@ -3,18 +3,18 @@
             [basic-particles.protocols.particle :refer :all]
             [basic-particles.protocols.vector :refer :all]))
 
-(defrecord TriangularParticle [location velocity lifespan angle speed]
+(defrecord TriangularParticle [location velocity lifespan angle speed mass]
   
   Particle
   
   (step [p [& forces]]
   	(let [new-lifespan (- lifespan (* 2 speed))
-          acceleration (multiply (reduce add forces) speed)
+          acceleration (divide (multiply (reduce add forces) speed) mass)
           new-velocity (add velocity acceleration)
           new-location (add location new-velocity)
           angular-velocity (/ (:x new-velocity) 10)
           new-angle (+ angle angular-velocity)]
-     (TriangularParticle. new-location new-velocity new-lifespan new-angle speed)))
+     (TriangularParticle. new-location new-velocity new-lifespan new-angle speed mass)))
   
   (render [p]
   	(q/stroke 0 lifespan)
