@@ -1,25 +1,33 @@
 (ns clouds.core
   (:require [quil.core :as q]
-            [quil.middleware :as m]))
+            [quil.middleware :as m]
+            [basic-particles.records.basic-particle-system :refer :all]
+            [basic-particles.records.vector2d :refer :all]
+            [clouds.puff :refer :all]
+            [basic-particles.protocols.particle-list :as pl]
+            [basic-particles.protocols.particle :as p]
+            [basic-particles.protocols.vector :as v]))
 
 (defn setup []
   (q/frame-rate 30)
-  {:color 0
-   :angle 0})
+  {:ps (->BasicParticleSystem [])})
 
-(defn update-state [state]
-  {:color (mod (+ (:color state) 0.7) 255)
-   :angle (+ (:angle state) 0.1)})
+(defn puff []
+  (let [location (->Vector2D (/ (q/width) 2) (/ (q/height) 2))
+        velocity (->Vector2D (q/random -3 3) (q/random -3 0))
+        lifespan 255
+        variance (q/random 0 25)]
+    (->Puff location velocity lifespan variance)))
 
-(defn draw-state [state]
+(defn update-state [{ps :ps}]
+  (let [new-ps (-> ps
+                   (p/step [(->Vector2D 0 0.05)])
+                   (pl/append [(puff)]))]
+    {:ps new-ps}))
+
+(defn draw-state [{ps :ps}]
   (q/background 240)
-  (q/fill (:color state) 255 255)
-  (let [angle (:angle state)
-        x (* 150 (q/cos angle))
-        y (* 150 (q/sin angle))]
-    (q/with-translation [(/ (q/width) 2)
-                         (/ (q/height) 2)]
-      (q/ellipse x y 100 100))))
+  (p/render ps))
 
 (defn -main []
   (q/defsketch clouds

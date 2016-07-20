@@ -7,9 +7,7 @@
             [basic-particles.records.triangular-particle :refer :all]
             [basic-particles.protocols.particle-list :as pl]
             [basic-particles.protocols.particle :as p]
-            [basic-particles.protocols.vector :as v]
-            
-            ))
+            [basic-particles.protocols.vector :as v]))
 
 (defn setup []
   (q/frame-rate 60)
