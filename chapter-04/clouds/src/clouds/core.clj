@@ -10,10 +10,14 @@
 
 (defn setup []
   (q/frame-rate 30)
-  {:ps (->CloudSystem [])})
+  {:ps (->CloudSystem (->Vector2D (/ (q/width) 2) (/ (q/height) 2)) 
+                      [(->CloudSystem (->Vector2D -40 -30) [])
+                       (->CloudSystem (->Vector2D 40 30) [])
+                       (->CloudSystem (->Vector2D -80 30) [])
+                       (->CloudSystem (->Vector2D 80 -30) [])])})
 
 (defn update-state [{ps :ps}]
-  (let [new-ps (p/step ps [])]
+  (let [new-ps (p/step ps  [])] ;; Comet effect [(->Vector2D 0.1 0.1)]
     {:ps new-ps}))
 
 (defn draw-state [{ps :ps}]
