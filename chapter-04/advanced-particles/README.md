@@ -2,6 +2,16 @@
 
 A Quil sketch designed to ... well, that part is up to you.
 
+## Setting Up Dependencies
+
+- Go to the basic-particles project (a sibling to this project) and run 'lein install'. This will create a .jar file and store it in your local repository (mine is located at ~/.m2)
+- Now you can go to the root of this project and start 'lein run'
+
+### Additional Info
+
+- Requiring files from other projects: http://stackoverflow.com/a/20281067/138392
+- Creating symlinks: http://stackoverflow.com/a/16321120/138392
+
 ## Usage
 
 LightTable - open `core.clj` and press `Ctrl+Shift+Enter` to evaluate the file.
