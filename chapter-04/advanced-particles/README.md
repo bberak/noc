@@ -5,6 +5,7 @@ A Quil sketch designed to ... well, that part is up to you.
 ## Setting Up Dependencies
 
 - Go to the basic-particles project (a sibling to this project) and run 'lein install'. This will create a .jar file and store it in your local repository (mine is located at ~/.m2)
+- Go to the basic-ces project (root of this repo) and run 'lein install'. This will create a .jar file and store it in your local repository (mine is located at ~/.m2)
 - Now you can go to the root of this project and start 'lein run'
 
 ### Additional Info

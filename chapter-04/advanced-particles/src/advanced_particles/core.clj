@@ -2,19 +2,11 @@
   (:require [quil.core :as q]
             [quil.middleware :as m]
             [basic-particles.records.vector2d :refer :all]
-            [basic-particles.protocols.vector :as v]))
-
-(defn entity [components]
-  {(keyword (str (java.util.UUID/randomUUID))) components})
-
-(defn system [state func]
-  (apply merge state (func state)))
-
-(defn filter-by-components [state & components]
-  (merge {} (filter (fn [[k v]] (every? #(contains? v %) components)) state)))
+            [basic-particles.protocols.vector :as v]
+            [basic-ces.core :refer :all]))
 
 (defn wind [state]
-  (let [entities-with-mass (filter-by-components state :mass :velocity)]
+  (let [entities-with-mass (filter-entities state :mass :velocity)]
     (map (fn [[id comps]]
            (let [mass (:mass comps)
                  wind (->Vector2D -0.2 0)
@@ -23,7 +15,7 @@
          entities-with-mass)))
 
 (defn gravity [state]
-  (let [entities-with-mass (filter-by-components state :mass :velocity)]
+  (let [entities-with-mass (filter-entities state :mass :velocity)]
     (map (fn [[id comps]]
            (let [mass (:mass comps)
                  gravity (->Vector2D 0 0.51)
@@ -32,19 +24,22 @@
          entities-with-mass)))
 
 (defn mover [state]
-  (let [movers (filter-by-components state :position :velocity)]
+  (let [movers (filter-entities state :position :velocity)]
     (map (fn [[id comps]] 
            {id (update comps :position v/add (:velocity comps))})
          movers)))
 
 (defn degeneration [state]
-  (let [degenerative-entities (filter-by-components state :lifespan)]
-    (map (fn [[id comps]] 
-           {id (update comps :lifespan - 6)})
+  (let [degenerative-entities (filter-entities state :lifespan)]
+    (map (fn [[id comps]]
+           (let [new-lifespan (- (:lifespan comps) 2)]
+             (if (< new-lifespan 0)
+              {}
+              {id (assoc comps :lifespan new-lifespan)})))
          degenerative-entities)))
 
 (defn renderer [state]
-  (let [renderables (filter-by-components state :renderable)]
+  (let [renderables (filter-entities state :renderable)]
     (map (fn [[id comps]]
            (let [render-func (:renderable comps)]
              (render-func comps)
@@ -55,12 +50,12 @@
   (let [position (:position components)
         lifespan (:lifespan components)]
     (q/fill 20 lifespan)
-    (q/ellipse (:x position) (:y position) 20 20)))
+    (q/ellipse (:x position) (:y position) 10 10)))
 
 (defn setup []
   (q/frame-rate 60)
   (merge {} (entity {:label :particle
-                     :velocity (->Vector2D 5 -2)
+                     :velocity (->Vector2D (q/random -1 3) (q/random 1 4))
                      :position (->Vector2D (/ (q/width) 2) 200)
                      :mass 1
                      :lifespan 255
@@ -68,6 +63,7 @@
 
 (defn prog-loop [state]
   (q/background 240)
+  (println state)
   (-> state
       (system gravity)
       (system wind)
