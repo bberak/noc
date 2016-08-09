@@ -7,44 +7,48 @@
 
 (defn wind [entities]
   (let [entities-with-mass (filter-entities entities :mass :velocity)]
-    (map-entities (fn [id comps]
-           (let [mass (:mass comps)
-                 wind (->Vector2D -0.2 0)
-                 acceleration (v/divide wind mass)]
-            {id (update comps :velocity v/add acceleration)}))
-         entities-with-mass)))
+    (reduce (fn [agg [id components]]
+              (let [mass (:mass components)
+                    wind (->Vector2D -0.2 0)
+                    acceleration (v/divide wind mass)]
+                (update-in agg [id :velocity] v/add acceleration)))
+            entities
+            entities-with-mass)))
 
 (defn gravity [entities]
   (let [entities-with-mass (filter-entities entities :mass :velocity)]
-    (map-entities (fn [id comps]
-           (let [mass (:mass comps)
-                 gravity (->Vector2D 0 0.51)
-                 acceleration (v/divide gravity mass)]
-            {id (update comps :velocity v/add acceleration)}))
-         entities-with-mass)))
+    (reduce (fn [agg [id components]]
+              (let [mass (:mass components)
+                    gravity (->Vector2D 0 0.51)
+                    acceleration (v/divide gravity mass)]
+                (update-in agg [id :velocity] v/add acceleration)))
+            entities
+            entities-with-mass)))
 
 (defn mover [entities]
   (let [movers (filter-entities entities :position :velocity)]
-    (map-entities (fn [id comps] 
-           {id (update comps :position v/add (:velocity comps))})
-         movers)))
+    (reduce (fn [agg [id components]]
+              (let [velocity (:velocity components)]
+                (update-in agg [id :position] v/add velocity)))
+            entities
+            movers)))
 
 (defn degeneration [entities]
   (let [degenerative-entities (filter-entities entities :lifespan)]
-    (map-entities (fn [id comps]
-           (let [new-lifespan (- (:lifespan comps) 2)]
-             (if (< new-lifespan 0)
-              {}
-              {id (assoc comps :lifespan new-lifespan)})))
-         degenerative-entities)))
+    (reduce (fn [agg [id components]]
+              (let [lifespan (:lifespan components)
+                    new-lifespan (- lifespan 2)]
+                 (if (< new-lifespan 0)
+                   (dissoc agg id)
+                   (assoc-in agg [id :lifespan] new-lifespan))))
+            entities
+            degenerative-entities)))
 
 (defn renderer [entities]
-  (let [renderables (filter-entities entities :renderable)]
-    (map-entities (fn [id comps]
-           (let [render-func (:renderable comps)]
-             (render-func comps)
-             {id comps}))
-         renderables)))
+  (doseq [[id components] (filter-entities entities :renderable)]
+    (let [render-func (:renderable components)]
+      (render-func components)))
+  entities)
 
 (defn render-particle [components]
   (let [position (:position components)
@@ -52,23 +56,27 @@
     (q/fill 20 lifespan)
     (q/ellipse (:x position) (:y position) 10 10)))
 
+(defn create-particle [position]
+  (entity {:label :particle
+           :velocity (->Vector2D (q/random -1 3) (q/random 1 4))
+           :position position
+           :mass 1
+           :lifespan 255
+           :renderable render-particle}))
+
 (defn setup []
   (q/frame-rate 60)
-  (merge {} (entity {:label :particle
-                     :velocity (->Vector2D (q/random -1 3) (q/random 1 4))
-                     :position (->Vector2D (/ (q/width) 2) 200)
-                     :mass 1
-                     :lifespan 255
-                     :renderable render-particle})))
+  (merge {} (create-particle (->Vector2D (/ (q/width) 2) 200))))
 
 (defn prog-loop [entities]
   (q/background 240)
+  (println entities)
   (-> entities
-      (system gravity)
-      (system wind)
-      (system mover)
-      (system degeneration)
-      (system renderer)))
+      (gravity)
+      (wind)
+      (mover)
+      (degeneration)
+      (renderer)))
 
 (defn -main []
   (q/defsketch basic-particles
