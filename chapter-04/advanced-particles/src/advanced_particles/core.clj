@@ -19,7 +19,7 @@
   (let [entities-with-mass (filter-entities entities :mass :velocity)]
     (reduce (fn [agg [id components]]
               (let [mass (:mass components)
-                    gravity (->Vector2D 0 0.51)
+                    gravity (->Vector2D 0 0.05)
                     acceleration (v/divide gravity mass)]
                 (update-in agg [id :velocity] v/add acceleration)))
             entities
@@ -44,19 +44,14 @@
             entities
             degenerative-entities)))
 
-(defn renderer [entities]
-  (doseq [[id components] (filter-entities entities :renderable)]
-    (let [render-func (:renderable components)]
-      (render-func components)))
-  entities)
-
 (defn render-particle [components]
   (let [position (:position components)
         lifespan (:lifespan components)]
+    (q/no-stroke)
     (q/fill 20 lifespan)
     (q/ellipse (:x position) (:y position) 10 10)))
 
-(defn create-particle [position]
+(defn create-particle-entity [position]
   (entity {:label :particle
            :velocity (->Vector2D (q/random -1 3) (q/random 1 4))
            :position position
@@ -64,14 +59,31 @@
            :lifespan 255
            :renderable render-particle}))
 
+(defn particle-emitter [entities]
+  (let [emitters (filter-entities entities :particle-emitter :position)]
+    (reduce (fn [agg [id components]]
+              (let [position (:position components)]
+                 (merge agg (create-particle-entity position))))
+            entities
+            emitters)))
+
+(defn renderer [entities]
+  (doseq [[id components] (filter-entities entities :renderable)]
+    (let [render-func (:renderable components)]
+      (render-func components)))
+  entities)
+
+
 (defn setup []
   (q/frame-rate 60)
-  (merge {} (create-particle (->Vector2D (/ (q/width) 2) 200))))
+  (merge {} (entity {:label :particle-system
+                     :position (->Vector2D (/ (q/width) 2) 200)
+                     :particle-emitter true})))
 
 (defn prog-loop [entities]
   (q/background 240)
-  (println entities)
   (-> entities
+      (particle-emitter)
       (gravity)
       (wind)
       (mover)
