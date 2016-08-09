@@ -5,42 +5,42 @@
             [basic-particles.protocols.vector :as v]
             [basic-ces.core :refer :all]))
 
-(defn wind [state]
-  (let [entities-with-mass (filter-entities state :mass :velocity)]
-    (map (fn [[id comps]]
+(defn wind [entities]
+  (let [entities-with-mass (filter-entities entities :mass :velocity)]
+    (map-entities (fn [id comps]
            (let [mass (:mass comps)
                  wind (->Vector2D -0.2 0)
                  acceleration (v/divide wind mass)]
             {id (update comps :velocity v/add acceleration)}))
          entities-with-mass)))
 
-(defn gravity [state]
-  (let [entities-with-mass (filter-entities state :mass :velocity)]
-    (map (fn [[id comps]]
+(defn gravity [entities]
+  (let [entities-with-mass (filter-entities entities :mass :velocity)]
+    (map-entities (fn [id comps]
            (let [mass (:mass comps)
                  gravity (->Vector2D 0 0.51)
                  acceleration (v/divide gravity mass)]
             {id (update comps :velocity v/add acceleration)}))
          entities-with-mass)))
 
-(defn mover [state]
-  (let [movers (filter-entities state :position :velocity)]
-    (map (fn [[id comps]] 
+(defn mover [entities]
+  (let [movers (filter-entities entities :position :velocity)]
+    (map-entities (fn [id comps] 
            {id (update comps :position v/add (:velocity comps))})
          movers)))
 
-(defn degeneration [state]
-  (let [degenerative-entities (filter-entities state :lifespan)]
-    (map (fn [[id comps]]
+(defn degeneration [entities]
+  (let [degenerative-entities (filter-entities entities :lifespan)]
+    (map-entities (fn [id comps]
            (let [new-lifespan (- (:lifespan comps) 2)]
              (if (< new-lifespan 0)
               {}
               {id (assoc comps :lifespan new-lifespan)})))
          degenerative-entities)))
 
-(defn renderer [state]
-  (let [renderables (filter-entities state :renderable)]
-    (map (fn [[id comps]]
+(defn renderer [entities]
+  (let [renderables (filter-entities entities :renderable)]
+    (map-entities (fn [id comps]
            (let [render-func (:renderable comps)]
              (render-func comps)
              {id comps}))
@@ -61,10 +61,9 @@
                      :lifespan 255
                      :renderable render-particle})))
 
-(defn prog-loop [state]
+(defn prog-loop [entities]
   (q/background 240)
-  (println state)
-  (-> state
+  (-> entities
       (system gravity)
       (system wind)
       (system mover)

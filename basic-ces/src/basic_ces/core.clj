@@ -1,26 +1,26 @@
 (ns basic-ces.core
   (:gen-class))
 
-(defn filter-entities [state & components]
-  (merge {} (filter (fn [[k v]] (every? #(contains? v %) components)) state)))
+(defn filter-entities [entities & components]
+  (merge {} (filter (fn [[k v]] (every? #(contains? v %) components)) entities)))
 
-(defn map-entities [state func]
+(defn map-entities [func entities]
   (map (fn [[id components]]
-         (let [result (func {id components})]
+         (let [result (func id components)]
            {id result}))
-       state))
+       entities))
 
-(defn -entity-merge [input & coll]
-  (reduce (fn [agg [id result]]
-            (if (or (= result {}) (nil? result))
-               (dissoc add id)
-               (merge agg result)))
-   
-           input coll))
+(defn -entity-merge [entities & coll]
+  (reduce (fn [agg item]
+            (let [[id result] (first item)]
+            	(if (or (= result {}) (nil? result))
+            		(dissoc agg id)
+            		(merge agg result))))
+           entities coll))
 
 (defn entity [components]
   {(keyword (str (java.util.UUID/randomUUID))) components})
 
-(defn system [state func]
-  (apply -entity-merge state (func state)))
+(defn system [entities func]
+  (apply -entity-merge entities (func entities)))
 
