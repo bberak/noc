@@ -1,42 +1,53 @@
 (ns dark-forces.core
   (:require [quil.core :as q]
             [quil.middleware :as m]
-            [basic-particles.protocols.particle :as p]
-            [basic-particles.protocols.particle-list :as pl]
-            [basic-particles.records.basic-particle-system :refer :all]
-            [basic-particles.records.square-particle :refer :all]
-            [basic-particles.records.vector2d :refer :all]))
+            [basic-particles.records.vector2d :refer :all]
+            [basic-ces.core :refer :all]
+            [dark-forces.systems :refer :all]))
 
 (defn setup []
   (q/frame-rate 60)
-  (q/color-mode :hsb)
-  {:ps (->BasicParticleSystem [])})
+  (merge {} (entity {:label :particle-system
+                     :position (->Vector2D (/ (q/width) 2) 200)
+                     :particle-emitter true})))
 
-(defn create-paricle []
-  (let [location (->Vector2D (/ (q/width) 2) (/ (q/height) 2))
-        lifespan 255
-        velocity (->Vector2D (q/random -3 -1) (q/random -3 -1))
-        angle (q/radians (q/random 0 360))]
-    (->SquareParticle location velocity lifespan angle)))
+(defn render-particle [components]
+  (let [position (:position components)
+        lifespan (:lifespan components)
+        angle (:angle components)]
+    (q/stroke 0 lifespan)
+    (q/rect-mode :center)
+    (q/fill 175 lifespan)
+    (q/with-translation [(:x position) (:y position)]
+      (q/with-rotation [angle]
+        (q/rect 0 0 8 8)))))
 
-(defn update-state [{ps :ps}]
-  (let [gravity (->Vector2D 0 0.05)
-        wind (->Vector2D -0.01 0)
-        updated-ps (-> ps 
-                     (p/step [gravity wind])
-                     (pl/append [(create-paricle)]))]
-    {:ps updated-ps}))
+(defn create-particle-entity [position]
+  (entity {:label :particle
+           :velocity (->Vector2D (q/random -3 -1) (q/random -3 -1))
+           :position position
+           :mass 1
+           :lifespan 255
+           :renderable render-particle
+           :angle 0}))
 
-(defn draw-state [{ps :ps}]
+(defn prog-loop [entities]
   (q/background 240)
-  (p/render ps))
+  (-> entities
+      (particle-emitter create-particle-entity)
+      (gravity)
+      (wind)
+      (mover)
+      (angular-rotation)
+      (degeneration)
+      (renderer)))
 
 (defn -main []
-  (q/defsketch dark-forces
-    :title "Dark Forces"
+  (q/defsketch basic-particles
+    :title "Advanced Particles"
     :size [800 600]
     :setup setup
-    :update update-state
-    :draw draw-state
+    :update prog-loop
     :features [:keep-on-top]
     :middleware [m/fun-mode]))
+
