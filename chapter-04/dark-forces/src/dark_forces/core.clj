@@ -37,6 +37,7 @@
       (particle-emitter create-particle-entity)
       (gravity)
       (wind)
+      (attract-and-repel-with-mouse)
       (mover)
       (angular-rotation)
       (degeneration)

@@ -7,7 +7,9 @@
   (multiply [v n]
   	(Vector2D. (* x n) (* y n)))
   (divide [v n]
-  	(Vector2D. (/ x n) (/ y n)))
+    (if (zero? n)
+      (Vector2D. 0 0)
+      (Vector2D. (/ x n) (/ y n))))
   (add [v1 v2]
   	(Vector2D. (+ x (:x v2)) (+ y (:y v2))))
   (subtract [v1 v2]
