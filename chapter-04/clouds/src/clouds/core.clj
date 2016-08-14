@@ -10,6 +10,7 @@
 
 (defn setup []
   (q/frame-rate 30)
+  (q/blend-mode :add)
   {:ps (->CloudSystem (->Vector2D (/ (q/width) 2) (/ (q/height) 2)) 
                       [(->CloudSystem (->Vector2D -40 -30) [])
                        (->CloudSystem (->Vector2D 40 30) [])
@@ -21,7 +22,7 @@
     {:ps new-ps}))
 
 (defn draw-state [{ps :ps}]
-  (q/background 240)
+  (q/background 74 144 226)
   (p/render ps))
 
 (defn -main []
@@ -32,4 +33,5 @@
     :update update-state
     :draw draw-state
     :features [:keep-on-top]
-    :middleware [m/fun-mode]))
+    :middleware [m/fun-mode]
+    :renderer :p2d))

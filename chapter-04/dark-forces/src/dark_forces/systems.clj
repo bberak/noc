@@ -29,11 +29,10 @@
   (let [g 0.8
         dir (v/subtract pos1 pos2)
         dir-u (v/normalize dir)
-        dist (v/magnitude dir)
-        dist-squared (q/sq dist)]
+        dist (v/magnitude dir)]
     (if (> dist max-range)
       (->Vector2D 0 0)
-      (v/multiply dir-u (-> g (* mass1) (* mass2) (/ dist-squared))))))
+      (v/multiply dir-u (-> g (* mass1) (* mass2) (/ (q/sq dist)))))))
 
 (defn attract-and-repel-with-mouse [entities]
   (let [entities-with-mass (filter-entities entities :mass :velocity)
@@ -43,8 +42,8 @@
     (reduce (fn [agg [id components]]
               (let [mass (:mass components)
                     pos (:position components)
-                    gravity (calculate-gravitational-force pos mass mouse-position mouse-mass max-range)
-                    accel (v/divide gravity (if (q/mouse-pressed?) (* mass -1) mass))]
+                    g-force (calculate-gravitational-force pos mass mouse-position mouse-mass max-range)
+                    accel (v/divide g-force (if (q/mouse-pressed?) (* mass -1) mass))]
                 (update-in agg [id :velocity] v/add accel)))
             entities
             entities-with-mass)))
