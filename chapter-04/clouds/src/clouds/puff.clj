@@ -17,7 +17,7 @@
   
   (render [p]
     (q/no-stroke)
-    (q/fill 255 (q/map-range lifespan 255 0 125 0))	
+    (q/fill 255) ;; Alpha transparency (q/fill 255 (q/map-range lifespan 255 0 125 0))	
     (q/with-translation [(:x location) (:y location)]
 	  (let [radius (* 40 (q/norm lifespan 0 255))]
       	(q/ellipse 0 0 (+ variance radius) (+ variance radius)))))
