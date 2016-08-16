@@ -21,7 +21,7 @@
         lifespan (:lifespan components)]
     (q/rect-mode :center)
     (q/image-mode :center)
-    (q/tint 255 (q/map-range lifespan 0 initial-lifespan 0 255))
+    (q/tint 60 (q/map-range lifespan 0 initial-lifespan 0 255))
     (q/with-translation [(:x position) (:y position)]
       (q/image @puff 0 0 40 40))))
 
