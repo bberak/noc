@@ -74,6 +74,11 @@
                     :vertex-2 [25 15]
                     :renderable render-edge
                     :body (body! world {:type :static} {:shape (edge [15 15] [25 15])})})
+           (entity {:label :platform
+                    :vertex-1 [30 20]
+                    :vertex-2 [40 30]
+                    :renderable render-edge
+                    :body (body! world {:type :static} {:shape (edge [30 20] [40 30])})})
            (create-box world [25.5 25])
            (create-ball world [14.5 25]))))
 
