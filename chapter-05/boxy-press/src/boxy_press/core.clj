@@ -9,6 +9,20 @@
 
 (def fps 60)
 
+(defn render-platform [camera platform-components]
+  (let [body (:body platform-components)
+        angle (* (angle body) -1)
+        world-pos (position body)
+        px-pos (tb/world-to-px camera world-pos)
+        width (:width platform-components)
+        height (:height platform-components)
+        scale (tb/world-to-px-scale camera)]
+    (q/fill 100)
+    (q/rect-mode :center)
+    (q/with-translation px-pos
+      (q/with-rotation [angle]
+        (q/rect 0 0 (* width scale) (* height scale))))))
+
 (defn render-ball [camera ball-components]
   (let [body (:body ball-components)
         world-pos (position body)
@@ -19,27 +33,18 @@
     (q/with-translation px-pos
       (q/ellipse 0 0 (* 2 radius scale) (* 2 radius scale)))))
 
-(defn render-edge [camera edge-components]
-  (let [body (:body edge-components)
-        vertex-1 (:vertex-1 edge-components)
-        vertex-2 (:vertex-2 edge-components)
-        [x1 y1] (tb/world-to-px camera vertex-1)
-        [x2 y2] (tb/world-to-px camera vertex-2)]
-    (q/fill 175)
-    (q/line x1 y1 x2 y2)))
-
 (defn create-ball [world pos]
   (entity {:label :ball
            :renderable render-ball
            :radius 1
            :body (body! world {:position pos} {:shape (circle 1) :restitution 0.7})}))
 
-(defn render-box [camera ball-components]
-  (let [body (:body ball-components)
+(defn render-box [camera box-components]
+  (let [body (:body box-components)
         angle (* (angle body) -1)
         world-pos (position body)
         px-pos (tb/world-to-px camera world-pos)
-        length (:length ball-components)
+        length (:length box-components)
         scale (tb/world-to-px-scale camera)]
     (q/fill 175)
     (q/rect-mode :center)
@@ -65,20 +70,22 @@
            (entity {:label :world
                     :world world})
            (entity {:label :platform
-                    :vertex-1 [5 5]
-                    :vertex-2 [35 5]
-                    :renderable render-edge
-                    :body (body! world {:type :static} {:shape (edge [5 5] [35 5])})})
+                    :renderable render-platform
+                    :width 10
+                    :height 0.5
+                    :body (body! world {:position [30 25] :type :static :angle (q/radians 45)} {:shape (box 5 0.25) :restitution 0.7})})
+           
            (entity {:label :platform
-                    :vertex-1 [15 15]
-                    :vertex-2 [25 15]
-                    :renderable render-edge
-                    :body (body! world {:type :static} {:shape (edge [15 15] [25 15])})})
+                    :renderable render-platform
+                    :width 10
+                    :height 0.5
+                    :body (body! world {:position [20 15] :type :static} {:shape (box 5 0.25) :restitution 0.7})})
+           
            (entity {:label :platform
-                    :vertex-1 [30 20]
-                    :vertex-2 [40 30]
-                    :renderable render-edge
-                    :body (body! world {:type :static} {:shape (edge [30 20] [40 30])})})
+                    :renderable render-platform
+                    :width 30
+                    :height 0.5
+                    :body (body! world {:position [20 5] :type :static} {:shape (box 15 0.25) :restitution 0.7})})
            (create-box world [25.5 25])
            (create-ball world [14.5 25]))))
 
