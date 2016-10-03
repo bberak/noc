@@ -64,10 +64,13 @@
               (q/ellipse 0 0 (* 2 radius) (* 2 radius)))))))))
 
 (defn create-flower [world pos]
-  (let [petals [{:position [0 1] :radius 0.7 :color [50 50 50]}
-                {:position [1 0] :radius 0.7 :color [50 50 50]}
-                {:position [-1 0] :radius 0.7 :color [50 50 50]}
-                {:position [0 0] :radius 0.5 :color [255 255 255]} ;; Flower Bud
+  (let [petal-color [154 229 125]
+        bud-color [232 177 91]
+        petals [{:position [0.5 0.5] :radius 0.7 :color petal-color}
+                {:position [-0.5 0.5] :radius 0.7 :color petal-color}
+                {:position [-0.5 -0.5] :radius 0.7 :color petal-color}
+                {:position [0.5 -0.5] :radius 0.7 :color petal-color}
+                {:position [0 0] :radius 0.5 :color bud-color} ;; Flower Bud
                 ]]
     (entity {:label :cone
              :renderable render-flower
