@@ -57,22 +57,23 @@
         (doseq [petal (:petals flower-components)]
           (let [petal-pos (first (poly-flip-y [(:position petal)]))
                 px-petal-pos (v-scale petal-pos scale)
-                radius (v-scale (:radius petal) scale)
+                radius (* (:radius petal) scale)
                 color (:color petal)]
             (q/with-translation [px-petal-pos]
               (q/fill (nth color 0) (nth color 1) (nth color 2))
               (q/ellipse 0 0 (* 2 radius) (* 2 radius)))))))))
 
 (defn create-flower [world pos]
-  (let [petals [{:position [0 0] :radius 0.5 :color [255 255 255]} ;; Bud
-                {:position [0 1] :radius 0.7 :color [50 50 50]}
+  (let [petals [{:position [0 1] :radius 0.7 :color [50 50 50]}
                 {:position [1 0] :radius 0.7 :color [50 50 50]}
-                {:position [-1 0] :radius 0.7 :color [50 50 50]}]]
+                {:position [-1 0] :radius 0.7 :color [50 50 50]}
+                {:position [0 0] :radius 0.5 :color [255 255 255]} ;; Flower Bud
+                ]]
     (entity {:label :cone
              :renderable render-flower
              :petals petals
-             :body (body! world {:position pos}
-                          (map (fn [x] {:shape (circle (:radius x)) :position (:position x) :restitution 0.7}) petals))})))
+             :body (apply body! world {:position pos}
+                          (map (fn [x] {:shape (circle (:radius x) (:position x)) :restitution 0.7}) petals))})))
 
 (defn setup []
   (q/frame-rate fps)
