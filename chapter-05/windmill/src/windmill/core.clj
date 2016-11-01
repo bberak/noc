@@ -20,11 +20,12 @@
         sail-px-pos (tb/world-to-px camera sail-world-pos)
         base-px-pos (tb/world-to-px camera base-world-pos)
         scale (tb/world-to-px-scale camera)]
+    (q/with-translation [base-px-pos]
+      (q/rect 0 0 (* (:width base) scale) (* (:height base) scale)))
     (q/with-translation [sail-px-pos]
       (q/with-rotation [sail-angle]
-        (q/rect 0 0 (* (:width sail) scale) (* (:height sail) scale))))
-    (q/with-translation [base-px-pos]
-      (q/rect 0 0 (* (:width base) scale) (* (:height base) scale)))))
+        (q/rect 0 0 (* (:width sail) scale) (* (:height sail) scale)))
+      (q/ellipse 0 0 10 10))))
 
 (defn create-windmill [world]
   (let [sail {:width 10 :height 1 :position [20 9.5]}
