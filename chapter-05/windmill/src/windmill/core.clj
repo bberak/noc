@@ -10,29 +10,41 @@
 (def fps 60)
 
 (defn render-windmill [camera windmill-components]
-  (q/fill 60)
+  (q/fill 100)
   (q/rect-mode :center)
   (let [sail (:sail windmill-components)
         base (:base windmill-components)
         sail-world-pos (position (:sail-body windmill-components))
+        sail-angle (* (angle (:sail-body windmill-components)) -1)
         base-world-pos (position (:base-body windmill-components))
         sail-px-pos (tb/world-to-px camera sail-world-pos)
         base-px-pos (tb/world-to-px camera base-world-pos)
         scale (tb/world-to-px-scale camera)]
     (q/with-translation [sail-px-pos]
-      (q/rect 0 0 (* (:width sail) scale) (* (:height sail) scale)))
+      (q/with-rotation [sail-angle]
+        (q/rect 0 0 (* (:width sail) scale) (* (:height sail) scale))))
     (q/with-translation [base-px-pos]
       (q/rect 0 0 (* (:width base) scale) (* (:height base) scale)))))
 
 (defn create-windmill [world]
   (let [sail {:width 10 :height 1 :position [20 9.5]}
-        base {:width 1 :height 10 :position [20 5]}]
+        base {:width 1 :height 10 :position [20 5]}
+        sail-body (body! world {:position (:position sail) :type :dynamic} {:shape (box (/ (:width sail) 2) (/ (:height sail) 2)) :restitution 0.7})
+        base-body (body! world {:position (:position base) :type :static} {:shape (box (/ (:width base) 2) (/ (:height base) 2)) :restitution 0.7})
+        joint (joint! {:type :revolute
+                       :body-a base-body
+                       :body-b sail-body
+                       :world-anchor [20 9.5]
+                       :enable-motor true
+                       :motor-speed (- PI)
+                       :max-motor-torque 10000})]
      (entity {:windmill nil
               :renderable render-windmill
               :sail sail
               :base base
-              :sail-body (body! world {:position (:position sail) :type :static} {:shape (box (/ (:width sail) 2) (/ (:height sail) 2)) :restitution 0.7})
-              :base-body (body! world {:position (:position base) :type :static} {:shape (box (/ (:width base) 2) (/ (:height base) 2)) :restitution 0.7})})))
+              :sail-body sail-body
+              :base-body base-body
+              :joint joint})))
 
 (defn render-cone [camera cone-components]
   (let [body (:body cone-components)
