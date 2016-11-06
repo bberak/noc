@@ -10,13 +10,15 @@
 
 (defn setup []
   (q/frame-rate fps)
-  (q/noise-detail 2)
+  (q/noise-detail 1)
   (let [world (box/new-world [0 -10])
-        window {:width 40 :height 30 :center [20 15]}]
+        window {:width 40 :height 30 :center [20 15]}
+        vertices (map (fn [x] [x (* (q/noise (/ x 10)) 20)]) (range -1 42))]
     (merge {}
            (e/camera window) 
            (e/world world)
-           (e/windmill world))))
+           (e/surface world vertices)
+           (e/car world))))
 
 (defn prog-loop [entities]
   (q/background 240)

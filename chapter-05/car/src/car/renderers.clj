@@ -4,6 +4,25 @@
             [org.nfrac.cljbox2d.core :as box]
             [org.nfrac.cljbox2d.vec2d :as v2]))
 
+(defn car [camera car-components]
+  (q/fill 160)
+  (q/rect-mode :center)
+  (let [chasis (:chasis car-components)
+        chasis-body (:chasis-body car-components)
+        back-wheel (:back-wheel car-components)
+        back-wheel-body (:back-wheel-body car-components)
+        front-wheel (:front-wheel car-components)
+        front-wheel-body (:front-wheel-body car-components)
+        scale (tb/world-to-px-scale camera)]
+    (q/with-translation [(tb/world-to-px camera (box/position chasis-body))]
+      (q/with-rotation [(* (box/angle chasis-body) -1)]
+        (q/rect 0 0 (* (:width chasis) scale) (* (:height chasis) scale))))
+    (q/with-translation [(tb/world-to-px camera (box/position back-wheel-body))]
+      (q/with-rotation [(* (box/angle back-wheel-body) -1)]
+        (q/ellipse 0 0 (* (:radius back-wheel) 2 scale) (* (:radius back-wheel) 2 scale))))
+    (q/with-translation [(tb/world-to-px camera (box/position front-wheel-body))]
+      (q/with-rotation [(* (box/angle front-wheel-body) -1)]
+        (q/ellipse 0 0 (* (:radius front-wheel) 2 scale) (* (:radius front-wheel) 2 scale))))))
 
 (defn windmill [camera windmill-components]
   (q/fill 100)
@@ -58,3 +77,12 @@
             (q/with-translation [px-petal-pos]
               (q/fill (nth color 0) (nth color 1) (nth color 2))
               (q/ellipse 0 0 (* 2 radius) (* 2 radius)))))))))
+
+(defn surface [camera surface-components]
+  (q/no-fill)
+  (q/stroke-weight 2)
+  (q/begin-shape)
+    (doseq [vertex (:vertices surface-components)]
+      (let [[x y] (tb/world-to-px camera vertex)]
+        (q/curve-vertex x y)))
+  (q/end-shape))
