@@ -8,7 +8,6 @@
 
 (def fps 60)
 
-
 (defn setup []
   (q/frame-rate fps)
   (q/noise-detail 2)
