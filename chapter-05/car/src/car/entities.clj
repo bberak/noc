@@ -1,5 +1,5 @@
 (ns car.entities
-  (:require [basic-ces.core :as ces]
+  (:require [car.ces :as ces]
             [car.renderers :as r]
             [org.nfrac.cljbox2d.core :as box]
             [org.nfrac.cljbox2d.vec2d :as v2]))

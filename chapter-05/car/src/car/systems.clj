@@ -1,6 +1,6 @@
 (ns car.systems
   (:require [quil.core :as q]
-            [basic-ces.core :as ces]
+            [car.ces :as ces]
             [org.nfrac.cljbox2d.testbed :as tb]
             [org.nfrac.cljbox2d.core :as box]))
 
