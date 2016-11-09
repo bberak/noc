@@ -13,13 +13,15 @@
   ([data]
     (ces/entity {:camera data})))
 
+(def not-nil? (complement nil?))
+
 (defn car [world]
   (let [chasis {:width 4 :height 2 :position [10 20]}
         back-wheel {:radius 0.5 :position [8.5 19]}
         front-wheel {:radius 0.5 :position [11.5 19]}
-        chasis-body (box/body! world {:position (:position chasis) :type :dynamic} {:shape (box/box (/ (:width chasis) 2) (/ (:height chasis) 2)) :restitution 0.1})
-        back-wheel-body (box/body! world {:position (:position back-wheel)} {:shape (box/circle (:radius back-wheel)) :restitution 0.1 :friction 1})
-        front-wheel-body (box/body! world {:position (:position front-wheel)} {:shape (box/circle (:radius front-wheel)) :restitution 0.1 :friction 1})
+        chasis-body (box/body! world {:position (:position chasis) :type :dynamic} {:shape (box/box (/ (:width chasis) 2) (/ (:height chasis) 2)) :restitution 0.01})
+        back-wheel-body (box/body! world {:position (:position back-wheel)} {:shape (box/circle (:radius back-wheel)) :restitution 0.01 :friction 1})
+        front-wheel-body (box/body! world {:position (:position front-wheel)} {:shape (box/circle (:radius front-wheel)) :restitution 0.01 :friction 1})
         back-wheel-joint (box/joint! {:type :revolute
                                       :body-a chasis-body
                                       :body-b back-wheel-body
@@ -33,6 +35,16 @@
                                        :world-anchor (:position front-wheel)})]
     (ces/entity {:car nil
                  :renderable r/car
+                 :draggable {:hit-test (fn [v] 
+                                         (first 
+                                           (filter not-nil? 
+                                                   (map (fn [body]
+                                                      (let [fixture (.getFixtureList body)
+                                                            inside (.testPoint fixture (box/vec2 v))]
+                                                        (if (true? inside)
+                                                          body
+                                                          nil)))
+                                                      [back-wheel-body front-wheel-body chasis-body]))))}
                  :chasis chasis
                  :back-wheel back-wheel
                  :front-wheel front-wheel
