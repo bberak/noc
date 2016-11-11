@@ -39,7 +39,7 @@
                                          (first 
                                            (filter not-nil? 
                                                    (map (fn [body]
-                                                      (let [fixture (.getFixtureList body)
+                                                      (let [fixture (box/fixture-of body)
                                                             inside (.testPoint fixture (box/vec2 v))]
                                                         (if (true? inside)
                                                           body
