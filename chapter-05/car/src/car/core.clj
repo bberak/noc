@@ -25,7 +25,7 @@
   (-> entities
       (s/tick (/ 1 fps))
       (s/click-and-drag :left)
-      ;;(s/click-and-spawn e/flower :left)
+      (s/click-and-spawn e/flower :left)
       (s/click-and-spawn e/cone :right)
       (s/renderer)))
 

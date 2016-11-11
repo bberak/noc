@@ -4,6 +4,9 @@
             [org.nfrac.cljbox2d.testbed :as tb]
             [org.nfrac.cljbox2d.core :as box]))
 
+(def not-nil? (complement nil?))
+(def any? (comp boolean some))
+
 (defn tick [entities secs]
   (doseq [[id components] (ces/filter-entities entities :world)]
     (let [world (:world components)]
@@ -15,8 +18,15 @@
     (let [world (:world (second (first (ces/filter-entities entities :world))))
           camera (:camera (second (first (ces/filter-entities entities :camera))))
           mouse-px-pos [(q/mouse-x) (q/mouse-y)]
-          mouse-world-pos (tb/px-to-world camera mouse-px-pos)]
-      (merge entities (entity-func world mouse-world-pos)))
+          mouse-world-pos (tb/px-to-world camera mouse-px-pos)
+          dragging (any? not-nil?
+                      (map 
+                        (fn [[id components]] 
+                          (get-in components [:draggable :joint])) 
+                        (ces/filter-entities entities :draggable)))]
+      (if (false? dragging) ;; Only spawn new entities if nothing is being dragged
+        (merge entities (entity-func world mouse-world-pos))
+        entities))
     entities))
 
 (defn renderer [entities]
@@ -25,8 +35,6 @@
       (let [render-func (:renderable components)]
         (render-func camera components)))
     entities))
-
-(def not-nil? (complement nil?))
 
 (defn click-and-drag [entities button]
   (let [world (:world (second (first (ces/filter-entities entities :world))))

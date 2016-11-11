@@ -4,6 +4,8 @@
             [org.nfrac.cljbox2d.core :as box]
             [org.nfrac.cljbox2d.vec2d :as v2]))
 
+(def not-nil? (complement nil?))
+
 (defn world [world]
   (ces/entity {:world world}))
 
@@ -12,8 +14,6 @@
     (camera {:width width :height height :center center}))
   ([data]
     (ces/entity {:camera data})))
-
-(def not-nil? (complement nil?))
 
 (defn car [world]
   (let [chasis {:width 4 :height 2 :position [10 20]}
@@ -76,15 +76,25 @@
 
 (defn cone [world pos]
   (let [radius 0.5
-        vertices [[0 -2] [0.5 0] [-0.5 0]]]
+        vertices [[0 -2] [0.5 0] [-0.5 0]]
+        body (box/body! world {:position pos} 
+                              {:shape (box/circle radius) :restitution 0.7}
+                              {:shape (box/polygon vertices) :restitution 0.7})]
     (ces/entity {:cone nil
                  :renderable r/cone
                  :radius radius
                  :vertices vertices
-                 :body (box/body! world {:position pos} 
-                              {:shape (box/circle radius) :restitution 0.7}
-                              {:shape (box/polygon vertices) :restitution 0.7})})))
-
+                 :body body
+                 :draggable {:hit-test (fn [v] 
+                                         (first 
+                                           (filter not-nil? 
+                                                   (map (fn [fixture]
+                                                      (let [inside (.testPoint fixture (box/vec2 v))]
+                                                        (if (true? inside)
+                                                          body
+                                                          nil)))
+                                                      (box/fixtureseq body)))))}})))
+                                                        
 (defn flower [world pos]
   (let [petal-color [154 229 125]
         bud-color [232 177 91]
@@ -92,12 +102,21 @@
                 {:position [-0.5 0.5] :radius 0.7 :color petal-color}
                 {:position [-0.5 -0.5] :radius 0.7 :color petal-color}
                 {:position [0.5 -0.5] :radius 0.7 :color petal-color}
-                {:position [0 0] :radius 0.5 :color bud-color}]]
+                {:position [0 0] :radius 0.5 :color bud-color}]
+        body (apply box/body! world {:position pos} (map (fn [x] {:shape (box/circle (:radius x) (:position x)) :restitution 0.7}) petals))]
     (ces/entity {:flower nil
                  :renderable r/flower
                  :petals petals
-                 :body (apply box/body! world {:position pos}
-                              (map (fn [x] {:shape (box/circle (:radius x) (:position x)) :restitution 0.7}) petals))})))
+                 :body body
+                 :draggable {:hit-test (fn [v] 
+                                         (first 
+                                           (filter not-nil? 
+                                                   (map (fn [fixture]
+                                                      (let [inside (.testPoint fixture (box/vec2 v))]
+                                                        (if (true? inside)
+                                                          body
+                                                          nil)))
+                                                      (box/fixtureseq body)))))}})))
 
 (defn surface [world vertices]
   (ces/entity {:chain nil
