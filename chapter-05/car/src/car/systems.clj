@@ -19,11 +19,8 @@
           camera (:camera (second (first (ces/filter-entities entities :camera))))
           mouse-px-pos [(q/mouse-x) (q/mouse-y)]
           mouse-world-pos (tb/px-to-world camera mouse-px-pos)
-          dragging (any? not-nil?
-                      (map 
-                        (fn [[id components]] 
-                          (get-in components [:draggable :joint])) 
-                        (ces/filter-entities entities :draggable)))]
+          draggables (ces/filter-entities entities :draggable)
+          dragging (any? not-nil? (map (fn [[id components]] (get-in components [:draggable :joint])) draggables))]
       (if (false? dragging) ;; Only spawn new entities if nothing is being dragged
         (merge entities (entity-func world mouse-world-pos))
         entities))
@@ -41,10 +38,11 @@
         ground-body (first (filter #(= :static (box/body-type %)) (box/bodyseq world)))
         camera (:camera (second (first (ces/filter-entities entities :camera))))
         mouse-down (and (q/mouse-pressed?) (= (q/mouse-button) button))
-        draggables (ces/filter-entities entities :draggable)]
+        draggables (ces/filter-entities entities :draggable)
+        dragging (any? not-nil? (map (fn [[id components]] (get-in components [:draggable :joint])) draggables))]
     (if (true? mouse-down)
       
-      ;; Mouse is down, find the components that are being clicked, update-or-create their joints
+      ;; Mouse is down and noth, find the components that are being clicked, update-or-create their joints
       ;; Find the components that are not being clicked, destroy their joints
       (reduce 
         (fn [agg [id components]]
@@ -57,7 +55,7 @@
               (let[]
                 (.setTarget joint (box/vec2 mouse-world-pos))
                 agg)
-              (if (not-nil? hit-test-body)
+              (if (and (not-nil? hit-test-body) (false? dragging)) ;; Only drag a new body if there is nothing else being dragged
                 (let [new-joint (box/joint! {:type :mouse
                                              :body-a ground-body
                                              :body-b hit-test-body
