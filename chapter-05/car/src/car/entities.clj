@@ -15,6 +15,17 @@
   ([data]
     (ces/entity {:camera data})))
 
+(defn wrecking-ball [world pos]
+  (let [radius 0.7
+        body (box/body! world {:position pos :type :kinematic} 
+                              {:shape (box/circle radius) :restitution 0.7})]
+    (ces/entity {:wrecking-ball nil
+                 :renderable r/wrecking-ball
+                 :radius radius
+                 :body body
+                 :controllable {:controls {:up [0 5] :down [0 -5] :left [-5 0] :right [5 0]}
+                                :damping-ratio 0.99}})))
+
 (defn car [world]
   (let [chasis {:width 4 :height 2 :position [10 20]}
         back-wheel {:radius 0.5 :position [8.5 19]}

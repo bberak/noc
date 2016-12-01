@@ -18,16 +18,18 @@
            (e/camera window) 
            (e/world world)
            (e/surface world vertices)
-           (e/car world))))
+           (e/car world)
+           (e/wrecking-ball world (:center window)))))
 
 (defn prog-loop [entities]
   (q/background 240)
   (-> entities
-      (s/tick (/ 1 fps))
-      (s/click-and-drag :left)
-      (s/click-and-spawn e/flower :left)
-      (s/click-and-spawn e/cone :right)
-      (s/renderer)))
+      (s/timing (/ 1 fps))
+      (s/dragging :left)
+      (s/spawning e/flower :left)
+      (s/spawning e/cone :right)
+      (s/controlling)
+      (s/rendering)))
 
 (defn -main []
   (q/defsketch car

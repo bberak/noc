@@ -4,6 +4,16 @@
             [org.nfrac.cljbox2d.core :as box]
             [org.nfrac.cljbox2d.vec2d :as v2]))
 
+(defn wrecking-ball [camera wrecking-ball-components]
+  (let [body (:body wrecking-ball-components)
+        world-pos (box/position body)
+        px-pos (tb/world-to-px camera world-pos)
+        radius (:radius wrecking-ball-components)
+        scale (tb/world-to-px-scale camera)]
+    (q/with-translation px-pos
+      (q/fill 40 120 160)
+      (q/ellipse 0 0 (* 2 radius scale) (* 2 radius scale)))))
+
 (defn car [camera car-components]
   (q/fill 160)
   (q/rect-mode :center)

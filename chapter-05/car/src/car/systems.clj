@@ -2,18 +2,33 @@
   (:require [quil.core :as q]
             [car.ces :as ces]
             [org.nfrac.cljbox2d.testbed :as tb]
-            [org.nfrac.cljbox2d.core :as box]))
+            [org.nfrac.cljbox2d.core :as box]
+            [org.nfrac.cljbox2d.vec2d :as v2]))
 
 (def not-nil? (complement nil?))
 (def any? (comp boolean some))
 
-(defn tick [entities secs]
+(defn timing [entities secs]
   (doseq [[id components] (ces/filter-entities entities :world)]
     (let [world (:world components)]
       (box/step! world secs)))
   entities)
 
-(defn click-and-spawn [entities entity-func button]
+(defn controlling [entities]
+  (doseq [[id components] (ces/filter-entities entities :controllable)]
+    (let [body (:body components)
+          controls (get-in components [:controllable :controls])
+          current-key (q/key-as-keyword)
+          direction (current-key controls)]
+      (if (and (q/key-pressed?) (not-nil? direction))
+        (box/linear-velocity! body direction)
+        (let [current-velocity (box/linear-velocity body)
+              damping-ratio (get-in components [:controllable :damping-ratio] 0)
+              new-velocity (v2/v-scale current-velocity damping-ratio)]
+          (box/linear-velocity! body new-velocity)))))
+  entities)
+
+(defn spawning [entities entity-func button]
   (if (and (q/mouse-pressed?) (= (q/mouse-button) button))
     (let [world (:world (second (first (ces/filter-entities entities :world))))
           camera (:camera (second (first (ces/filter-entities entities :camera))))
@@ -26,14 +41,14 @@
         entities))
     entities))
 
-(defn renderer [entities]
+(defn rendering [entities]
   (let [camera (:camera (second (first (ces/filter-entities entities :camera))))]
     (doseq [[id components] (ces/filter-entities entities :renderable)]
       (let [render-func (:renderable components)]
         (render-func camera components)))
     entities))
 
-(defn click-and-drag [entities button]
+(defn dragging [entities button]
   (let [world (:world (second (first (ces/filter-entities entities :world))))
         ground-body (first (filter #(= :static (box/body-type %)) (box/bodyseq world)))
         camera (:camera (second (first (ces/filter-entities entities :camera))))
