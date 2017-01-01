@@ -6,15 +6,20 @@
             [org.nfrac.cljbox2d.vec2d :as v2]))
 
 (def not-nil? (complement nil?))
+
 (def any? (comp boolean some))
 
-(defn timing [entities secs]
+(defn log 
+  ([anything] (println anything) anything)
+  ([label anything] (println label anything) anything))
+
+(defn game-time [entities secs]
   (doseq [[id components] (ces/filter-entities entities :world)]
     (let [world (:world components)]
       (box/step! world secs)))
   entities)
 
-(defn controlling [entities]
+(defn control [entities]
   (reduce 
         (fn [agg [id components]]
           (let [controls (get-in components [:controllable :controls])
@@ -26,7 +31,7 @@
         entities
         (ces/filter-entities entities :controllable)))
 
-(defn selecting [entities]
+(defn selection [entities]
   (if (q/mouse-pressed?)
     (let [camera (:camera (second (first (ces/filter-entities entities :camera))))
           mouse-px-pos [(q/mouse-x) (q/mouse-y)]
@@ -40,7 +45,31 @@
         (ces/filter-entities entities :selectable)))
     entities))
 
-(defn spawning [entities entity-func button]
+(defn gravity [entities]
+  (let [gravity-bodies (ces/filter-entities entities :gravity)
+        gravity-func (fn [components-1 components-2]
+                       (let [gravitational-constant 8
+                             body-1 (get-in components-1 [:body])
+                             mass-1 ((get-in components-1 [:gravity :get-mass]))
+                             pos-1 (box/position body-1)
+                             body-2 (get-in components-2 [:body])
+                             mass-2 ((get-in components-2 [:gravity :get-mass]))
+                             pos-2 (box/position body-2)
+                             dir (v2/v-sub pos-2 pos-1)
+                             dist (v2/v-dist pos-1 pos-2)
+                             r-unit (v2/v-scale dir)
+                             r-squared (* dist dist)]
+                         (v2/v-scale r-unit (/ (* gravitational-constant mass-1 mass-2) r-squared))))]
+        (doseq [[id components] gravity-bodies]
+          (let [body (get-in components [:body])
+                pos (box/position body)
+                others (dissoc gravity-bodies id)
+                forces (map (fn [[other-id other-components]] (gravity-func components other-components)) others)
+                agg-force (reduce v2/v-add [0 0] forces)]
+            (box/apply-force! body agg-force pos)))
+        entities))
+
+(defn spawn [entities entity-func button]
   (if (and (q/mouse-pressed?) (= (q/mouse-button) button))
     (let [world (:world (second (first (ces/filter-entities entities :world))))
           camera (:camera (second (first (ces/filter-entities entities :camera))))
@@ -55,14 +84,14 @@
         entities))
     entities))
 
-(defn rendering [entities]
+(defn render [entities]
   (let [camera (:camera (second (first (ces/filter-entities entities :camera))))]
     (doseq [[id components] (ces/filter-entities entities :renderable)]
       (let [render-func (:renderable components)]
         (render-func camera components)))
     entities))
 
-(defn dragging [entities button]
+(defn drag [entities button]
   (let [world (:world (second (first (ces/filter-entities entities :world))))
         ground-body (first (filter #(= :static (box/body-type %)) (box/bodyseq world)))
         camera (:camera (second (first (ces/filter-entities entities :camera))))

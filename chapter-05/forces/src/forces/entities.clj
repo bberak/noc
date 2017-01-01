@@ -19,7 +19,7 @@
   (let [restitution 0.7
         radius-factor 4
         radius (* density radius-factor)
-        body (box/body! world {:position pos :type :kinematic} 
+        body (box/body! world {:position pos} 
                               {:shape (box/circle radius) :restitution restitution :density density})
         grow-func (fn [components op] 
                    (if (true? (get-in components [:selectable :selected]))
@@ -28,13 +28,14 @@
                            new-radius (* new-density radius-factor)]
                        (.destroyFixture body fixture)
                        (box/fixture! body {:shape (box/circle new-radius) :restitution restitution :density new-density})
-                       ;; (.resetMassData body) - not sure if this is required after removing and adding fixtures
+                       ;; (.resetMassData body) ;;- not sure if this is required after removing and adding fixtures
                        (assoc-in components [:radius] new-radius))
                      components))]
     (ces/entity {:astro-body nil
                  :renderable r/astro-body
                  :radius radius
                  :body body
+                 :gravity {:get-mass #(box/mass body)}
                  :selectable {:selected false 
                               :hit-test (fn [v] 
                                           (let [fixture (box/fixture-of body)]

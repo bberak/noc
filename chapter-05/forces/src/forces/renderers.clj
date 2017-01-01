@@ -72,8 +72,8 @@
         (q/fill 232 177 91)
         (q/begin-shape)
         (doseq [[x y] (map 
-                           (fn [v] (v2/v-scale v scale)) 
-                           (v2/poly-flip-y (:vertices cone-components)))]
+                        (fn [v] (v2/v-scale v scale)) 
+                        (v2/poly-flip-y (:vertices cone-components)))]
           (q/vertex x y))
         (q/end-shape :close)))))
 
