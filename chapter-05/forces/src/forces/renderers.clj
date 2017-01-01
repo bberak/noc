@@ -9,10 +9,16 @@
         world-pos (box/position body)
         px-pos (tb/world-to-px camera world-pos)
         radius (:radius astro-body-components)
-        scale (tb/world-to-px-scale camera)]
-    (q/with-translation px-pos
-      (q/fill (- 255 (* 25 radius)) (- 255 (* 25 radius)) (- 255 (* 25 radius)))
-      (q/ellipse 0 0 (* 2 radius scale) (* 2 radius scale)))))
+        scale (tb/world-to-px-scale camera)
+        selected (get-in astro-body-components [:selectable :selected])
+        stroke (cond (true? selected) [0 255 255] :else [0 0 0])
+        stroke-weight (cond (true? selected) 5 :else 1)]
+    (q/with-stroke stroke
+      (q/stroke-weight stroke-weight)
+      (q/with-translation px-pos
+        (q/fill (- 255 (* 25 radius)) (- 255 (* 25 radius)) (- 255 (* 25 radius)))
+        (q/ellipse 0 0 (* 2 radius scale) (* 2 radius scale)))))
+      (q/stroke-weight 1))
 
 (defn car [camera car-components]
   (q/fill 160)

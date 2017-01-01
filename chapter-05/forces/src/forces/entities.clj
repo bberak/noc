@@ -28,19 +28,19 @@
                            new-radius (* new-density radius-factor)]
                        (.destroyFixture body fixture)
                        (box/fixture! body {:shape (box/circle new-radius) :restitution restitution :density new-density})
-                       ;; (.resetMassData body) - not sure if this is required after adding a fixture
+                       ;; (.resetMassData body) - not sure if this is required after removing and adding fixtures
                        (assoc-in components [:radius] new-radius))
                      components))]
     (ces/entity {:astro-body nil
                  :renderable r/astro-body
                  :radius radius
                  :body body
-                 :selectable {:selected true 
+                 :selectable {:selected false 
                               :hit-test (fn [v] 
                                           (let [fixture (box/fixture-of body)]
                                             (.testPoint fixture (box/vec2 v))))}
-                 :controllable {:controls {:up #(-> %1 (grow-func +))
-                                           :down #(-> %1 (grow-func -))}}})))
+                 :controllable {:controls {:up #(-> % (grow-func +))
+                                           :down #(-> % (grow-func -))}}})))
 
 (defn car [world]
   (let [chasis {:width 4 :height 2 :position [10 20]}

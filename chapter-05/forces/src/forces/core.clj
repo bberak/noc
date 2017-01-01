@@ -26,9 +26,10 @@
   (q/background 240)
   (-> entities
       (s/timing (/ 1 fps))
+      (s/selecting)
+      (s/controlling)
       (s/spawning e/flower :left)
       (s/spawning e/cone :right)
-      (s/controlling)
       (s/rendering)))
 
 (defn -main []

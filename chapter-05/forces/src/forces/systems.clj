@@ -26,6 +26,20 @@
         entities
         (ces/filter-entities entities :controllable)))
 
+(defn selecting [entities]
+  (if (q/mouse-pressed?)
+    (let [camera (:camera (second (first (ces/filter-entities entities :camera))))
+          mouse-px-pos [(q/mouse-x) (q/mouse-y)]
+          mouse-world-pos (tb/px-to-world camera mouse-px-pos)]
+      (reduce 
+        (fn [agg [id components]]
+          (let [hit-test (get-in components [:selectable :hit-test])
+                clicked (hit-test mouse-world-pos)]
+            (assoc-in agg [id :selectable :selected] clicked)))
+        entities
+        (ces/filter-entities entities :selectable)))
+    entities))
+
 (defn spawning [entities entity-func button]
   (if (and (q/mouse-pressed?) (= (q/mouse-button) button))
     (let [world (:world (second (first (ces/filter-entities entities :world))))
@@ -33,8 +47,10 @@
           mouse-px-pos [(q/mouse-x) (q/mouse-y)]
           mouse-world-pos (tb/px-to-world camera mouse-px-pos)
           draggables (ces/filter-entities entities :draggable)
-          dragging (any? not-nil? (map (fn [[id components]] (get-in components [:draggable :joint])) draggables))]
-      (if (false? dragging) ;; Only spawn new entities if nothing is being dragged
+          dragging (any? not-nil? (map (fn [[id components]] (get-in components [:draggable :joint])) draggables))
+          selectables (ces/filter-entities entities :selectable)
+          selecting (any? true? (map (fn [[id components]] (get-in components [:selectable :selected])) selectables))]
+      (if (and (false? dragging) (false? selecting)) ;; Only spawn new entities if nothing is being dragged or selected
         (merge entities (entity-func world mouse-world-pos))
         entities))
     entities))
