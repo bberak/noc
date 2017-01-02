@@ -69,6 +69,18 @@
             (box/apply-force! body agg-force pos)))
         entities))
 
+(defn collision [entities]
+  (let [world (:world (second (first (ces/filter-entities entities :world))))]
+    (reduce (fn [agg [id components]]
+    (doseq [contact (box/all-current-contacts world)]
+      (let [body-a (box/body-of (:fixture-a contact))
+            body-b (box/body-of (:fixture-b contact))
+            entity-a ((box/user-data body-a) entities)
+            entity-b ((box/user-data body-b) entities)]
+        (log "entity-a" entity-a)
+        (log "entity-b" entity-b)))
+    entities))
+
 (defn spawn [entities entity-func button]
   (if (and (q/mouse-pressed?) (= (q/mouse-button) button))
     (let [world (:world (second (first (ces/filter-entities entities :world))))

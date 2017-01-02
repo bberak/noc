@@ -31,6 +31,7 @@
       (s/spawn e/flower :left)
       (s/spawn e/cone :right)
       (s/gravity)
+      (s/collision)
       (s/render)))
 
 (defn -main []

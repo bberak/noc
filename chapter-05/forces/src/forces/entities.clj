@@ -16,10 +16,11 @@
     (ces/entity {:camera data})))
 
 (defn astro-body [world pos density]
-  (let [restitution 0.7
+  (let [id (ces/id)
+        restitution 0.7
         radius-factor 4
         radius (* density radius-factor)
-        body (box/body! world {:position pos} 
+        body (box/body! world {:position pos :user-data id} 
                               {:shape (box/circle radius) :restitution restitution :density density})
         grow-func (fn [components op] 
                    (if (true? (get-in components [:selectable :selected]))
@@ -31,17 +32,17 @@
                        ;; (.resetMassData body) ;;- not sure if this is required after removing and adding fixtures
                        (assoc-in components [:radius] new-radius))
                      components))]
-    (ces/entity {:astro-body nil
-                 :renderable r/astro-body
-                 :radius radius
-                 :body body
-                 :gravity {:get-mass #(box/mass body)}
-                 :selectable {:selected false 
-                              :hit-test (fn [v] 
-                                          (let [fixture (box/fixture-of body)]
-                                            (.testPoint fixture (box/vec2 v))))}
-                 :controllable {:controls {:up #(-> % (grow-func +))
-                                           :down #(-> % (grow-func -))}}})))
+    (ces/entity id {:astro-body nil
+                    :renderable r/astro-body
+                    :radius radius
+                    :body body
+                    :gravity {:get-mass #(box/mass body)}
+                    :selectable {:selected false 
+                                 :hit-test (fn [v] 
+                                              (let [fixture (box/fixture-of body)]
+                                                (.testPoint fixture (box/vec2 v))))}
+                    :controllable {:controls {:up #(-> % (grow-func +))
+                                              :down #(-> % (grow-func -))}}})))
 
 (defn car [world]
   (let [chasis {:width 4 :height 2 :position [10 20]}
