@@ -7,7 +7,8 @@
   (keyword (str (java.util.UUID/randomUUID))))
 
 (defn entity 
-  ([components] (entity (id) components))
+  ([components] 
+   (entity (id) components))
   ([id components]
   	{id components}))
 

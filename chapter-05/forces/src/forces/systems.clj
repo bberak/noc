@@ -21,15 +21,15 @@
 
 (defn control [entities]
   (reduce 
-        (fn [agg [id components]]
-          (let [controls (get-in components [:controllable :controls])
-                current-key (q/key-as-keyword)
-                key-func (current-key controls)]
-            (if (and (q/key-pressed?) (not-nil? key-func))
-              (assoc-in agg [id] (key-func components))
-              agg)))
-        entities
-        (ces/filter-entities entities :controllable)))
+    (fn [agg [id components]]
+      (let [controls (get-in components [:controllable :controls])
+            current-key (q/key-as-keyword)
+            key-func (current-key controls)]
+        (if (and (q/key-pressed?) (not-nil? key-func))
+          (assoc-in agg [id] (key-func components))
+          agg)))
+    entities
+    (ces/filter-entities entities :controllable)))
 
 (defn selection [entities]
   (if (q/mouse-pressed?)
@@ -69,17 +69,26 @@
             (box/apply-force! body agg-force pos)))
         entities))
 
+;; Because I can track the previous 'collided' state and the current 'collided' state of an entity,
+;; it makes it fairly simple to add 'beginCollision', 'endCollision', and 'onCollision|stillColliding' event handlers (callbacks)
+;; on the entity's :collideable components..
 (defn collision [entities]
-  (let [world (:world (second (first (ces/filter-entities entities :world))))]
-    (reduce (fn [agg [id components]]
-    (doseq [contact (box/all-current-contacts world)]
-      (let [body-a (box/body-of (:fixture-a contact))
-            body-b (box/body-of (:fixture-b contact))
-            entity-a ((box/user-data body-a) entities)
-            entity-b ((box/user-data body-b) entities)]
-        (log "entity-a" entity-a)
-        (log "entity-b" entity-b)))
-    entities))
+  (let [collideables (ces/filter-entities entities :collideable)]
+    (if (not-empty collideables)
+      (let [world (:world (second (first (ces/filter-entities entities :world))))
+            contacts (box/all-current-contacts world)
+            colliding-entity-ids (flatten 
+                                   [(map (fn [contact]
+                                          (let [body-a (box/body-of (:fixture-a contact))
+                                                body-b (box/body-of (:fixture-b contact))]
+                                            (filter not-nil? [(box/user-data body-a) (box/user-data body-b)]))) contacts)])]
+        (reduce (fn [agg [id components]]
+                  (let [collided (not-nil? (some #{id} colliding-entity-ids))]
+                    (assoc-in agg [id :collideable :collided] collided)))
+                entities 
+                collideables))
+      entities)))
+
 
 (defn spawn [entities entity-func button]
   (if (and (q/mouse-pressed?) (= (q/mouse-button) button))

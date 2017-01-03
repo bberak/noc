@@ -36,6 +36,7 @@
                     :renderable r/astro-body
                     :radius radius
                     :body body
+                    :collideable {:collided false}
                     :gravity {:get-mass #(box/mass body)}
                     :selectable {:selected false 
                                  :hit-test (fn [v] 

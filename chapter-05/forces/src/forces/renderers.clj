@@ -12,11 +12,13 @@
         scale (tb/world-to-px-scale camera)
         selected (get-in astro-body-components [:selectable :selected])
         stroke (cond (true? selected) [0 255 255] :else [0 0 0])
-        stroke-weight (cond (true? selected) 5 :else 1)]
+        stroke-weight (cond (true? selected) 5 :else 1)
+        collided (get-in astro-body-components [:collideable :collided])
+        color (cond (true? collided) [255 0 0] :else [(- 255 (* 25 radius)) (- 255 (* 25 radius)) (- 255 (* 25 radius))])]
     (q/with-stroke stroke
       (q/stroke-weight stroke-weight)
       (q/with-translation px-pos
-        (q/fill (- 255 (* 25 radius)) (- 255 (* 25 radius)) (- 255 (* 25 radius)))
+        (apply q/fill color)
         (q/ellipse 0 0 (* 2 radius scale) (* 2 radius scale)))))
       (q/stroke-weight 1))
 
