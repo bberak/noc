@@ -48,7 +48,11 @@
                     :gravity {:get-mass #(box/mass body)}
                     :selectable {:selected false 
                                  :hit-test hit-test}
-                    :draggable {:hit-test hit-test}                
+                    :draggable {:hit-test hit-test}
+                    ;; Because we want to limit the logic contained within entities (logic should be mainly in systems),
+                    ;; perhaps it might be better to move the control functions in a separate system..
+                    ;; Eg, we could have a system that controls astro bodies (:controllable :astro-body) and a system
+                    ;; that controls cones (:controllable :cone) etc..                 
                     :controllable {:controls {:up #(-> % (grow-func +))
                                               :down #(-> % (grow-func -))}}})))
 
