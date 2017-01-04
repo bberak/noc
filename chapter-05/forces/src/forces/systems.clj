@@ -39,7 +39,7 @@
       (reduce 
         (fn [agg [id components]]
           (let [hit-test (get-in components [:selectable :hit-test])
-                clicked (hit-test mouse-world-pos)]
+                clicked (not-nil? (hit-test mouse-world-pos))]
             (assoc-in agg [id :selectable :selected] clicked)))
         entities
         (ces/filter-entities entities :selectable)))
@@ -119,9 +119,8 @@
         mouse-down (and (q/mouse-pressed?) (= (q/mouse-button) button))
         draggables (ces/filter-entities entities :draggable)
         dragging (any? not-nil? (map (fn [[id components]] (get-in components [:draggable :joint])) draggables))]
-    (if (true? mouse-down)
-      
-      ;; Mouse is down and noth, find the components that are being clicked, update-or-create their joints
+    (if (true? mouse-down)    
+      ;; Mouse is down, find the components that are being clicked, update-or-create their joints
       ;; Find the components that are not being clicked, destroy their joints
       (reduce 
         (fn [agg [id components]]
@@ -146,7 +145,6 @@
                 agg))))
         entities
         draggables)
-      
       ;; Mouse is no longer down, destroy and remove all mouse joints on the draggable components
       (reduce 
         (fn [agg [id components]]

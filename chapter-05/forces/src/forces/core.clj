@@ -17,6 +17,7 @@
     (merge {}
            (e/camera window) 
            (e/world world)
+           (e/ground world)
            (e/astro-body world (:center window) 0.8)
            (e/astro-body world [5 5] 0.2)
            (e/astro-body world [20 20] 0.2)
@@ -28,6 +29,7 @@
       (s/game-time (/ 1 fps))
       (s/selection)
       (s/control)
+      (s/drag :left)
       (s/spawn e/flower :left)
       (s/spawn e/cone :right)
       (s/gravity)

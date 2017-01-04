@@ -15,6 +15,10 @@
   ([data]
     (ces/entity {:camera data})))
 
+(defn ground [world]
+  (ces/entity {:ground nil
+               :body (box/body! world {:type :static})}))
+
 (defn astro-body [world pos density]
   (let [id (ces/id)
         restitution 0.7
@@ -22,6 +26,10 @@
         radius (* density radius-factor)
         body (box/body! world {:position pos :user-data id} 
                               {:shape (box/circle radius) :restitution restitution :density density})
+        hit-test (fn [v] 
+                   (let [fixture (box/fixture-of body)
+                         inside (.testPoint fixture (box/vec2 v))]
+                     (if (true? inside) body nil)))
         grow-func (fn [components op] 
                    (if (true? (get-in components [:selectable :selected]))
                      (let [fixture (box/fixture-of body)
@@ -29,7 +37,7 @@
                            new-radius (* new-density radius-factor)]
                        (.destroyFixture body fixture)
                        (box/fixture! body {:shape (box/circle new-radius) :restitution restitution :density new-density})
-                       ;; (.resetMassData body) ;;- not sure if this is required after removing and adding fixtures
+                       ;; (.resetMassData body) ;; - not sure if this is required after removing and adding fixtures, doesn't look like it!
                        (assoc-in components [:radius] new-radius))
                      components))]
     (ces/entity id {:astro-body nil
@@ -39,9 +47,8 @@
                     :collideable {:collided false}
                     :gravity {:get-mass #(box/mass body)}
                     :selectable {:selected false 
-                                 :hit-test (fn [v] 
-                                              (let [fixture (box/fixture-of body)]
-                                                (.testPoint fixture (box/vec2 v))))}
+                                 :hit-test hit-test}
+                    :draggable {:hit-test hit-test}                
                     :controllable {:controls {:up #(-> % (grow-func +))
                                               :down #(-> % (grow-func -))}}})))
 
