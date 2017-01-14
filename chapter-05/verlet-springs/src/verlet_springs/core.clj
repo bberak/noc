@@ -8,7 +8,7 @@
            [toxi.physics2d.behaviors GravityBehavior]
            [toxi.geom Vec2D Rect]))
 
-(def fps 60)
+(def fps 1)
 
 (defn setup []
   (q/frame-rate fps)
@@ -18,7 +18,7 @@
     (.addBehavior physics (GravityBehavior. (Vec2D. 0 0.5)))
     (merge {}
            (e/physics physics)
-           (e/particle physics (Vec2D. 200 200)))))
+           (e/pendulum physics (Vec2D. 400 100)))))
 
 (defn prog-loop [entities]
   (q/background 240)

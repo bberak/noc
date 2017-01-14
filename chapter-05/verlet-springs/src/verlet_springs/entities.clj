@@ -3,7 +3,7 @@
             [verlet-springs.renderers :as r]
             [org.nfrac.cljbox2d.core :as box]
             [org.nfrac.cljbox2d.vec2d :as v2])
-  (:import [toxi.physics2d VerletParticle2D] 
+  (:import [toxi.physics2d VerletParticle2D VerletSpring2D] 
            [toxi.geom Vec2D Rect]))
 
 (def not-nil? (complement nil?))
@@ -175,4 +175,48 @@
     (.addParticle physics verlet-particle)
     (ces/entity {:particle verlet-particle
                  :renderable r/particle})))
+
+(defn spring [physics pos-1 pos-2]
+  (let [particle-1 (VerletParticle2D. pos-1)
+        particle-2 (VerletParticle2D. pos-2)
+        spring (VerletSpring2D. particle-1 particle-2 300 0.01)]
+    (.lock particle-1)
+    (.addParticle physics particle-1)
+    (.addParticle physics particle-2)
+    (.addSpring physics spring)
+    (ces/entity {:spring spring
+                 :particle-1 particle-1
+                 :particle-2 particle-2
+                 :renderable r/spring})))
+
+(defn pendulum [physics pos]
+  (let [particles (map (fn [x]
+                         (let [p (VerletParticle2D. (.add pos (Vec2D. x 0)))]
+                           (.addParticle physics p)
+                           p)) 
+                       (range 0 400 20))
+        first-particle (first particles)]
+    (.lock first-particle)
+    (ces/entity {:pendulum nil
+                 :particles particles
+                 :renderable r/pendulum})))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

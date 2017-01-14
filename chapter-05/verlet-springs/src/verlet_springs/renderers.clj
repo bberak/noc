@@ -106,8 +106,59 @@
   (q/end-shape))
 
 (defn particle [particle-components]
-  (let [particle (:particle particle-components)
-        pos [(.x particle) (.y particle)]]
-    (q/with-translation pos
-      (q/fill 251 77 104)
-      (q/ellipse 0 0 10 10))))
+  (let [particle (:particle particle-components)]
+    (q/fill 251 77 104)
+    (q/ellipse (.x particle) (.y particle) 20 20)))
+
+(defn spring [spring-components]
+  (let [particle-1 (:particle-1 spring-components)
+        particle-2 (:particle-2 spring-components)
+        x1 (.x particle-1)
+        y1 (.y particle-1)
+        x2 (.x particle-2)
+        y2 (.y particle-2)]
+    (q/fill 251 77 104)
+    (q/stroke-weight 3)
+    (q/line x1 y1 x2 y2)
+    (q/ellipse x1 y1 20 20)
+    (q/ellipse x2 y2 20 20)))
+
+(defn pendulum [pendulum-components]
+  (let [particles (:particles pendulum-components)]
+    (q/begin-shape :points)
+      (doseq [p particles]
+        (q/vertex (.x p) (.y p)))
+    (q/end-shape)))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
