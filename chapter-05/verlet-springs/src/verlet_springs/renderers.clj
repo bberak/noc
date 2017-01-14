@@ -124,11 +124,19 @@
     (q/ellipse x2 y2 20 20)))
 
 (defn pendulum [pendulum-components]
-  (let [particles (:particles pendulum-components)]
-    (q/begin-shape :points)
+  (let [particles (:particles pendulum-components)
+        first-particle (first particles)
+        last-particle (last particles)
+        radius (:radius pendulum-components)]
+    (q/fill 255)
+    (q/begin-shape)
+      (q/curve-vertex (.x first-particle) (.y first-particle))
       (doseq [p particles]
-        (q/vertex (.x p) (.y p)))
-    (q/end-shape)))
+        (q/curve-vertex (.x p) (.y p)))
+      (q/curve-vertex (.x last-particle) (.y last-particle))
+    (q/end-shape)
+    (q/fill 251 77 104)
+    (q/ellipse (.x last-particle) (.y last-particle) (* radius 2) (* radius 2))))
 
 
 

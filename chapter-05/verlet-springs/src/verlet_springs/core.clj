@@ -8,7 +8,7 @@
            [toxi.physics2d.behaviors GravityBehavior]
            [toxi.geom Vec2D Rect]))
 
-(def fps 1)
+(def fps 60)
 
 (defn setup []
   (q/frame-rate fps)
@@ -21,10 +21,11 @@
            (e/pendulum physics (Vec2D. 400 100)))))
 
 (defn prog-loop [entities]
-  (q/background 240)
+  (q/background 255)
   (-> entities
       (s/game-time)
-      (s/simple-render)))
+      (s/drag :left)
+      (s/render)))
 
 (defn -main []
   (q/defsketch verlet-springs

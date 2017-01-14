@@ -111,20 +111,20 @@
         entities))
     entities))
 
-(defn render [entities]
+(defn box2d-render [entities]
   (let [camera (:camera (second (first (ces/filter-entities entities :camera))))]
     (doseq [[id components] (ces/filter-entities entities :renderable)]
       (let [render-func (:renderable components)]
         (render-func camera components)))
     entities))
 
-(defn simple-render [entities]
+(defn render [entities]
   (doseq [[id components] (ces/filter-entities entities :renderable)]
     (let [render-func (:renderable components)]
       (render-func components)))
   entities)
 
-(defn drag [entities button]
+(defn box2d-drag [entities button]
   (let [world (:world (second (first (ces/filter-entities entities :world))))
         ground-body (first (filter #(= :static (box/body-type %)) (box/bodyseq world)))
         camera (:camera (second (first (ces/filter-entities entities :camera))))
@@ -168,3 +168,31 @@
               agg)))
         entities
         draggables))))
+
+(defn drag [entities button]
+  (let [mouse-down (and (q/mouse-pressed?) (= (q/mouse-button) button))
+        mouse-pos [(q/mouse-x) (q/mouse-y)]
+        draggables (ces/filter-entities entities :draggable)
+        dragging (any? true? (map (fn [[id components]] (get-in components [:draggable :dragging])) draggables))]
+    (reduce 
+      (fn [agg [id components]]
+        (let [currently-being-dragged (get-in components [:draggable :dragging])
+              on-drag (get-in components [:draggable :on-drag])
+              hit-test (get-in components [:draggable :hit-test])]
+          (cond
+            (false? mouse-down)
+              (assoc-in agg [id :draggable :dragging] false) ;; Mouse is no longer down, set dragging flags to false
+
+            (true? currently-being-dragged) ;; Is the current item being dragged? If yes - call the on-drag function
+              (let []
+                (on-drag mouse-pos)
+                agg)
+
+            (and (true? (hit-test mouse-pos)) (false? dragging)) ;; Only drag a new body if there is nothing else being dragged
+              (let []
+                (on-drag mouse-pos)
+                (assoc-in agg [id :draggable :dragging] true))
+
+            :else agg)))
+      entities
+      draggables)))

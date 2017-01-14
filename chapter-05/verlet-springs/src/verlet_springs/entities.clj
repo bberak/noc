@@ -195,11 +195,29 @@
                            (.addParticle physics p)
                            p)) 
                        (range 0 400 20))
-        first-particle (first particles)]
+        first-particle (first particles)
+        last-particle (last particles)
+        radius 20]
     (.lock first-particle)
+    (reduce 
+      (fn [a b]
+        (.addSpring physics (VerletSpring2D. a b 20 0.81))
+        b)
+      particles)
     (ces/entity {:pendulum nil
                  :particles particles
-                 :renderable r/pendulum})))
+                 :renderable r/pendulum
+                 :radius radius
+                 :draggable {:hit-test (fn [pos]
+                                         (let [mouse-pos (Vec2D. (first pos) (second pos))
+                                               particle-pos (Vec2D. (.x last-particle) (.y last-particle))
+                                               distance (.distanceTo mouse-pos particle-pos)]
+                                           (< distance radius)))
+                            :on-drag (fn [pos]
+                                      (.lock last-particle)
+                                      (set! (. last-particle x) (first pos))
+                                      (set! (. last-particle y) (second pos))
+                                      (.unlock last-particle))}})))
 
 
 
