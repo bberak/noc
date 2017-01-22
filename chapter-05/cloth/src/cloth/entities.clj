@@ -1,12 +1,11 @@
 (ns cloth.entities
-  (:require [cloth.ces :as ces]
+  (:require [cloth.helpers :refer :all]
+            [cloth.ces :as ces]
             [cloth.renderers :as r]
             [org.nfrac.cljbox2d.core :as box]
             [org.nfrac.cljbox2d.vec2d :as v2])
   (:import [toxi.physics2d VerletParticle2D VerletSpring2D] 
            [toxi.geom Vec2D Rect]))
-
-(def not-nil? (complement nil?))
 
 (defn world [world]
   (ces/entity {:world world}))
@@ -226,14 +225,45 @@
                                   (.addParticle physics p)
                                   p))
                               (range 0 400 20))))
-                       (range 0 400 20)))
+                       (range 0 300 20)))
         first-particle (first (first particles))
-        last-particle (last (first particles))]
+        last-particle (last (first particles))
+        hit-radius 40
+        dist-func (fn [mouse-pos p]
+                    (let [particle-pos (Vec2D. (.x p) (.y p))] 
+                      (.distanceTo mouse-pos particle-pos)))]
     (.lock first-particle)
-    (.lock last-particle)
+    (.lock last-particle)    
+    (doall (map-indexed 
+               (fn [y row]
+                  (doall 
+                    (map-indexed 
+                      (fn [x col]
+                        (let [top-left col
+                              top-right (get row (inc x))
+                              bottom-left (get (get particles (inc y) []) x)]
+                          (if (every? not-nil? [top-left top-right])
+                            (.addSpring physics (VerletSpring2D. top-left top-right 20 0.41)))
+                          (if (every? not-nil? [top-left bottom-left])
+                            (.addSpring physics (VerletSpring2D. top-left bottom-left 20 0.41)))))
+                      row)))
+               particles))
     (ces/entity {:cloth nil
                  :particles particles
-                 :renderable r/cloth})))
+                 :renderable r/cloth
+                 :draggable {:hit-test (fn [pos]
+                                         (let [mouse-pos (Vec2D. (first pos) (second pos))]
+                                           (any? #(< (dist-func mouse-pos %) hit-radius) (flatten [particles]))))
+                             :on-drag (fn [prev-pos pos]
+                                         (let [prev-mouse-pos (Vec2D. (first prev-pos) (second prev-pos))
+                                               mouse-pos (Vec2D. (first pos) (second pos))
+                                               diff (.sub mouse-pos prev-mouse-pos)
+                                               touching (filter #(< (dist-func mouse-pos %) hit-radius) (flatten [particles]))]
+                                           (doseq [p touching]
+                                              (.lock p)
+                                              (set! (. p x) (+ (.x p) (.x diff)))
+                                              (set! (. p y) (+ (.y p) (.y diff)))
+                                              (.unlock p))))}})))
 
 
 

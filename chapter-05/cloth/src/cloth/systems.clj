@@ -1,5 +1,5 @@
 (ns cloth.systems
-  (:require [cloth.helpers]
+  (:require [cloth.helpers :refer :all]
             [quil.core :as q]
             [cloth.ces :as ces]
             [org.nfrac.cljbox2d.testbed :as tb]
@@ -165,6 +165,7 @@
 (defn drag [entities button]
   (let [mouse-down (and (q/mouse-pressed?) (= (q/mouse-button) button))
         mouse-pos [(q/mouse-x) (q/mouse-y)]
+        prev-mouse-pos [(q/pmouse-x) (q/pmouse-y)]
         draggables (ces/filter-entities entities :draggable)
         dragging (any? true? (map (fn [[id components]] (get-in components [:draggable :dragging])) draggables))]
     (reduce 
@@ -178,12 +179,12 @@
 
             (true? currently-being-dragged) ;; Is the current item being dragged? If yes - call the on-drag function
               (let []
-                (on-drag mouse-pos)
+                (on-drag prev-mouse-pos mouse-pos)
                 agg)
 
             (and (true? (hit-test mouse-pos)) (false? dragging)) ;; Only drag a new body if there is nothing else being dragged
               (let []
-                (on-drag mouse-pos)
+                (on-drag prev-mouse-pos mouse-pos)
                 (assoc-in agg [id :draggable :dragging] true))
 
             :else agg)))

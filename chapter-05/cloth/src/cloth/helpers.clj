@@ -1,4 +1,4 @@
-(ns cloth.systems)
+(ns cloth.helpers)
 
 (def not-nil? (complement nil?))
 

@@ -1,11 +1,9 @@
 (ns cloth.renderers
-  (:require [cloth.helpers]
+  (:require [cloth.helpers :refer :all]
             [quil.core :as q]
             [org.nfrac.cljbox2d.testbed :as tb]
             [org.nfrac.cljbox2d.core :as box]
             [org.nfrac.cljbox2d.vec2d :as v2]))
-
-(def not-nil? (complement nil?))
 
 (defn astro-body [camera astro-body-components]
   (let [body (:body astro-body-components)

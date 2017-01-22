@@ -18,7 +18,7 @@
     (.addBehavior physics (GravityBehavior. (Vec2D. 0 0.5)))
     (merge {}
            (e/physics physics)
-           (e/cloth physics (Vec2D. 100 100)))))
+           (e/cloth physics (Vec2D. 200 100)))))
 
 (defn prog-loop [entities]
   (q/background 255)
