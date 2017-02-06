@@ -167,25 +167,26 @@
         mouse-pos [(q/mouse-x) (q/mouse-y)]
         prev-mouse-pos [(q/pmouse-x) (q/pmouse-y)]
         draggables (ces/filter-entities entities :draggable)
-        dragging (any? true? (map (fn [[id components]] (get-in components [:draggable :dragging])) draggables))]
+        dragging (any? not-nil? (map (fn [[id components]] (get-in components [:draggable :dragging])) draggables))]
     (reduce 
       (fn [agg [id components]]
         (let [currently-being-dragged (get-in components [:draggable :dragging])
               on-drag (get-in components [:draggable :on-drag])
-              hit-test (get-in components [:draggable :hit-test])]
+              hit-test (get-in components [:draggable :hit-test])
+              hit-result (hit-test mouse-pos)]
           (cond
             (false? mouse-down)
-              (assoc-in agg [id :draggable :dragging] false) ;; Mouse is no longer down, set dragging flags to false
+              (assoc-in agg [id :draggable :dragging] nil) ;; Mouse is no longer down, set dragging flags to nil
 
-            (true? currently-being-dragged) ;; Is the current item being dragged? If yes - call the on-drag function
+            (not-nil? currently-being-dragged) ;; Is the current item being dragged? If yes - call the on-drag function
               (let []
-                (on-drag prev-mouse-pos mouse-pos)
+                (on-drag prev-mouse-pos mouse-pos currently-being-dragged)
                 agg)
 
-            (and (true? (hit-test mouse-pos)) (false? dragging)) ;; Only drag a new body if there is nothing else being dragged
+            (and (not-nil? hit-result) (false? dragging)) ;; Only drag a new body if there is nothing else being dragged
               (let []
-                (on-drag prev-mouse-pos mouse-pos)
-                (assoc-in agg [id :draggable :dragging] true))
+                (on-drag prev-mouse-pos mouse-pos hit-result)
+                (assoc-in agg [id :draggable :dragging] hit-result))
 
             :else agg)))
       entities

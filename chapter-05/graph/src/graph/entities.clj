@@ -287,17 +287,15 @@
                  :renderable r/graph
                  :draggable {:hit-test (fn [pos]
                                          (let [mouse-pos (Vec2D. (first pos) (second pos))]
-                                           (any? #(< (dist-func mouse-pos %) hit-radius) nodes)))
-                             :on-drag (fn [prev-pos pos]
+                                           (first (filter #(< (dist-func mouse-pos %) hit-radius) nodes))))
+                             :on-drag (fn [prev-pos pos node]
                                          (let [prev-mouse-pos (Vec2D. (first prev-pos) (second prev-pos))
                                                mouse-pos (Vec2D. (first pos) (second pos))
-                                               diff (.sub mouse-pos prev-mouse-pos)
-                                               touching (filter #(< (dist-func mouse-pos %) hit-radius) nodes)]
-                                           (doseq [n touching]
-                                              (.lock n)
-                                              (set! (. n x) (+ (.x n) (.x diff)))
-                                              (set! (. n y) (+ (.y n) (.y diff)))                                              
-                                              (.unlock n))))}})))
+                                               diff (.sub mouse-pos prev-mouse-pos)]
+                                            (.lock node)
+                                            (set! (. node x) (+ (.x node) (.x diff)))
+                                            (set! (. node y) (+ (.y node) (.y diff)))                                              
+                                            (.unlock node)))}})))
 
 
 
