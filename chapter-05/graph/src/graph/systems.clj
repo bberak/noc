@@ -165,13 +165,13 @@
 (defn drag [entities button]
   (let [mouse-down (and (q/mouse-pressed?) (= (q/mouse-button) button))
         mouse-pos [(q/mouse-x) (q/mouse-y)]
-        prev-mouse-pos [(q/pmouse-x) (q/pmouse-y)]
         draggables (ces/filter-entities entities :draggable)
         dragging (any? not-nil? (map (fn [[id components]] (get-in components [:draggable :dragging])) draggables))]
     (reduce 
       (fn [agg [id components]]
         (let [currently-being-dragged (get-in components [:draggable :dragging])
               on-drag (get-in components [:draggable :on-drag])
+              get-pos (get-in components [:draggable :get-pos])
               hit-test (get-in components [:draggable :hit-test])
               hit-result (hit-test mouse-pos)]
           (cond
@@ -179,13 +179,13 @@
               (assoc-in agg [id :draggable :dragging] nil) ;; Mouse is no longer down, set dragging flags to nil
 
             (not-nil? currently-being-dragged) ;; Is the current item being dragged? If yes - call the on-drag function
-              (let []
-                (on-drag prev-mouse-pos mouse-pos currently-being-dragged)
+              (let [prev-pos (get-pos currently-being-dragged)]
+                (on-drag prev-pos mouse-pos currently-being-dragged)
                 agg)
 
             (and (not-nil? hit-result) (false? dragging)) ;; Only drag a new body if there is nothing else being dragged
-              (let []
-                (on-drag prev-mouse-pos mouse-pos hit-result)
+              (let [prev-pos (get-pos hit-result)]
+                (on-drag prev-pos mouse-pos hit-result)
                 (assoc-in agg [id :draggable :dragging] hit-result))
 
             :else agg)))

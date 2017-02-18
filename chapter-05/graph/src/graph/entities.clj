@@ -288,6 +288,7 @@
                  :draggable {:hit-test (fn [pos]
                                          (let [mouse-pos (Vec2D. (first pos) (second pos))]
                                            (first (filter #(< (dist-func mouse-pos %) hit-radius) nodes))))
+                             :get-pos (fn [node] [(.x node) (.y node)])
                              :on-drag (fn [prev-pos pos node]
                                          (let [prev-mouse-pos (Vec2D. (first prev-pos) (second prev-pos))
                                                mouse-pos (Vec2D. (first pos) (second pos))
