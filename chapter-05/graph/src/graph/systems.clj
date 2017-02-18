@@ -44,6 +44,9 @@
         (ces/filter-entities entities :selectable)))
     entities))
 
+;; This should be abstracted so the system does not know about the underlying
+;; physics system (Box2D, Verlet, custom). I should use functions like get-pos,
+;; get-mass and apply-force on the entities with primitive data types as arguments.
 (defn gravity [entities]
   (let [gravity-bodies (ces/filter-entities entities :gravity)
         gravity-func (fn [components-1 components-2]
@@ -164,7 +167,7 @@
 
 ;; I reckon the dragging system should be simplified.
 ;; All draggable entities should have one on-drag function that takes the following
-;; args: (defn on-drag [mouse-button mouse-start mouse-end components]
+;; args: (defn on-drag [mouse-button start-pos end-pos components]
 ;; This keeps the system more digestible and gives the entity a lot of control on how
 ;; to update its own state
 (defn drag [entities button]
