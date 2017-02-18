@@ -285,18 +285,28 @@
     (ces/entity {:graph nil
                  :nodes nodes
                  :renderable r/graph
-                 :draggable {:hit-test (fn [pos]
-                                         (let [mouse-pos (Vec2D. (first pos) (second pos))]
+                 :draggable {:hit-test (fn [pos components]
+                                         (let [mouse-pos (Vec2D. (first pos) (second pos))
+                                               nodes (:nodes components)]
                                            (first (filter #(< (dist-func mouse-pos %) hit-radius) nodes))))
-                             :get-pos (fn [node] [(.x node) (.y node)])
-                             :on-drag (fn [prev-pos pos node]
+                             :get-pos (fn [node components] [(.x node) (.y node)])
+                             :on-drag (fn [prev-pos pos node components]
                                          (let [prev-mouse-pos (Vec2D. (first prev-pos) (second prev-pos))
                                                mouse-pos (Vec2D. (first pos) (second pos))
                                                diff (.sub mouse-pos prev-mouse-pos)]
                                             (.lock node)
                                             (set! (. node x) (+ (.x node) (.x diff)))
                                             (set! (. node y) (+ (.y node) (.y diff)))                                              
-                                            (.unlock node)))}})))
+                                            (.unlock node)))}
+                 :clickable {:on-left-click (fn [pos components]
+                                              (if (nil? (get-in components [:draggable :dragging]))
+                                                (let [new-node (VerletParticle2D. (Vec2D. (first pos) (second pos)))
+                                                      nodes (:nodes components)]
+                                                  (doseq [other nodes]
+                                                    (.addSpring physics (VerletSpring2D. new-node other 160 0.001)))
+                                                  (assoc-in components [:nodes] (conj nodes new-node)))
+                                                components))
+                             :on-right-click (fn [pos components] components)}})))
 
 
 

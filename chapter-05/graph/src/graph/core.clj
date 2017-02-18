@@ -24,6 +24,7 @@
   (-> entities
       (s/game-time)
       (s/drag :left)
+      (s/click)
       (s/render)))
 
 (defn -main []
