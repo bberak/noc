@@ -175,7 +175,7 @@
 (def mouse-dragged? (atom false))
 (def mouse-clicked? (atom false))
 
-(defn mouse-tracking [entities]
+(defn mouse-input [entities]
   (reset! previous-mouse-position @mouse-position)
   (reset! previous-mouse-button @mouse-button)
   (reset! mouse-position [(q/mouse-x) (q/mouse-y)])

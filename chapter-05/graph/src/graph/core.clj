@@ -22,7 +22,7 @@
 (defn prog-loop [entities]
   (-> entities
       (s/game-time)
-      (s/mouse-tracking)
+      (s/mouse-input)
       (s/dragging)
       (s/clicking)
       (s/rendering)))
