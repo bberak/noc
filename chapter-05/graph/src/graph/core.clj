@@ -20,7 +20,6 @@
            (e/graph physics (Vec2D. 200 100)))))
 
 (defn prog-loop [entities]
-  (q/background 255)
   (-> entities
       (s/game-time)
       (s/mouse-tracking)

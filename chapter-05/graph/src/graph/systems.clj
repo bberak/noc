@@ -116,6 +116,7 @@
     entities))
 
 (defn rendering [entities]
+  (q/background 255)
   (doseq [[id components] (ces/filter-entities entities :renderable)]
     (let [render-func (:renderable components)]
       (render-func components)))
