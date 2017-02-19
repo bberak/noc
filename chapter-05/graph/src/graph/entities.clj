@@ -302,13 +302,11 @@
                              :on-drag-end (fn [components]
                                             (assoc-in components [:draggable :target] nil))}
                  :clickable {:on-click (fn [mouse-button pos components]
-                                          (if (nil? (get-in components [:draggable :target]))
-                                            (let [new-node (VerletParticle2D. (Vec2D. (first pos) (second pos)))
-                                                  nodes (:nodes components)]
-                                              (doseq [other nodes]
-                                                (.addSpring physics (VerletSpring2D. new-node other spring-length spring-tension)))
-                                              (assoc-in components [:nodes] (conj nodes new-node)))
-                                            components))}})))
+                                          (let [new-node (VerletParticle2D. (Vec2D. (first pos) (second pos)))
+                                                nodes (:nodes components)]
+                                            (doseq [other nodes]
+                                              (.addSpring physics (VerletSpring2D. new-node other spring-length spring-tension)))
+                                            (assoc-in components [:nodes] (conj nodes new-node))))}})))
 
 
 
