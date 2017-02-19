@@ -23,9 +23,10 @@
   (q/background 255)
   (-> entities
       (s/game-time)
-      (s/drag :left)
-      (s/click)
-      (s/render)))
+      (s/mouse-tracking)
+      (s/dragging)
+      (s/clicking)
+      (s/rendering)))
 
 (defn -main []
   (q/defsketch graph

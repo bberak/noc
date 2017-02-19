@@ -47,6 +47,7 @@
 ;; This should be abstracted so the system does not know about the underlying
 ;; physics system (Box2D, Verlet, custom). I should use functions like get-pos,
 ;; get-mass and apply-force on the entities with primitive data types as arguments.
+;; To support multi-body entities I can use a get-bodies function.
 (defn gravity [entities]
   (let [gravity-bodies (ces/filter-entities entities :gravity)
         gravity-func (fn [components-1 components-2]
@@ -92,7 +93,7 @@
       entities)))
 
 
-(defn spawn [entities entity-func button]
+(defn spawning [entities entity-func button]
   (if (and (q/mouse-pressed?) (= (q/mouse-button) button))
     (let [world (:world (second (first (ces/filter-entities entities :world))))
           camera (:camera (second (first (ces/filter-entities entities :camera))))
@@ -107,20 +108,20 @@
         entities))
     entities))
 
-(defn box2d-render [entities]
+(defn box2d-rendering [entities]
   (let [camera (:camera (second (first (ces/filter-entities entities :camera))))]
     (doseq [[id components] (ces/filter-entities entities :renderable)]
       (let [render-func (:renderable components)]
         (render-func camera components)))
     entities))
 
-(defn render [entities]
+(defn rendering [entities]
   (doseq [[id components] (ces/filter-entities entities :renderable)]
     (let [render-func (:renderable components)]
       (render-func components)))
   entities)
 
-(defn box2d-drag [entities button]
+(defn box2d-dragging [entities button]
   (let [world (:world (second (first (ces/filter-entities entities :world))))
         ground-body (first (filter #(= :static (box/body-type %)) (box/bodyseq world)))
         camera (:camera (second (first (ces/filter-entities entities :camera))))
@@ -165,76 +166,60 @@
         entities
         draggables))))
 
-;; I reckon the dragging system should be simplified.
-;; All draggable entities should have one on-drag function that takes the following
-;; args: (defn on-drag [mouse-button start-pos end-pos components]
-;; This keeps the system more digestible and gives the entity a lot of control on how
-;; to update its own state
-(defn drag [entities button]
-  (let [mouse-down (and (q/mouse-pressed?) (= (q/mouse-button) button))
-        mouse-pos [(q/mouse-x) (q/mouse-y)]
-        draggables (ces/filter-entities entities :draggable)
-        dragging (any? not-nil? (map (fn [[id components]] (get-in components [:draggable :dragging])) draggables))]
+(def previous-mouse-position (atom nil))
+(def previous-mouse-button (atom nil))
+(def mouse-position (atom nil))
+(def mouse-button (atom nil))
+(def previous-mouse-dragged? (atom false))
+(def mouse-dragged? (atom false))
+(def mouse-clicked? (atom false))
+
+(defn mouse-tracking [entities]
+  (reset! previous-mouse-position @mouse-position)
+  (reset! previous-mouse-button @mouse-button)
+  (reset! mouse-position [(q/mouse-x) (q/mouse-y)])
+  (reset! mouse-button (cond (q/mouse-pressed?) (q/mouse-button) :else nil))
+  (reset! previous-mouse-dragged? @mouse-dragged?)
+  (reset! mouse-dragged? (and 
+                           (not-nil? @mouse-button)
+                           (= @previous-mouse-button @mouse-button)
+                           (not-nil? @previous-mouse-position)
+                           (not-nil? @mouse-position)
+                           (or (not= @previous-mouse-position @mouse-position) (true? @previous-mouse-dragged?))))
+  (reset! mouse-clicked? (and
+                           (not-nil? @previous-mouse-button)
+                           (nil? @mouse-button)
+                           (false? @previous-mouse-dragged?)))
+  entities)
+
+(defn dragging [entities]
+  (cond 
+
+    @mouse-dragged?
     (reduce 
       (fn [agg [id components]]
-        (let [currently-being-dragged (get-in components [:draggable :dragging])
-              on-drag (get-in components [:draggable :on-drag])
-              get-pos (get-in components [:draggable :get-pos])
-              hit-test (get-in components [:draggable :hit-test])
-              hit-result (hit-test mouse-pos components)]
-          (cond
-            (false? mouse-down)
-              (assoc-in agg [id :draggable :dragging] nil) ;; Mouse is no longer down, set dragging flags to nil
-
-            (not-nil? currently-being-dragged) ;; Is the current item being dragged? If yes - call the on-drag function
-              (let [prev-pos (get-pos currently-being-dragged components)]
-                (on-drag prev-pos mouse-pos currently-being-dragged components)
-                agg)
-
-            (and (not-nil? hit-result) (false? dragging)) ;; Only drag a new body if there is nothing else being dragged
-              (let [prev-pos (get-pos hit-result components)]
-                (on-drag prev-pos mouse-pos hit-result components)
-                (assoc-in agg [id :draggable :dragging] hit-result))
-
-            :else agg)))
+        (let [on-drag (get-in components [:draggable :on-drag])]
+          (assoc-in agg [id] (on-drag @mouse-button @previous-mouse-position @mouse-position components))))
       entities
-      draggables)))
+      (ces/filter-entities entities :draggable))
 
-;; As with the drag system, I think the click system could be simplified too..
-;; All clickable entites should have the following function: (defn on-lick [button pos components])
-(def previous-left-mouse-down (atom false))
-(def previous-right-mouse-down (atom false))
-(def left-mouse-click (atom false))
-(def right-mouse-click (atom false))
+    (and (true? @previous-mouse-dragged?) (false? @mouse-dragged?))
+    (reduce 
+      (fn [agg [id components]]
+        (let [on-drag-end (get-in components [:draggable :on-drag-end])]
+          (assoc-in agg [id] (on-drag-end components))))
+      entities
+      (ces/filter-entities entities :draggable))
 
-(defn click [entities]
-  (let [mouse-pressed? (q/mouse-pressed?)
-        mouse-button (q/mouse-button)
-        current-left-mouse-down (and mouse-pressed? (= mouse-button :left))
-        current-right-mouse-down (and mouse-pressed? (= mouse-button :right))
-        clickables (ces/filter-entities entities :clickable)]
-    (swap! left-mouse-click (fn [current-state]
-      (and (false? @previous-left-mouse-down) (true? current-left-mouse-down))))
-    (swap! right-mouse-click (fn [current-state]
-      (and (false? @previous-right-mouse-down) (true? current-right-mouse-down))))
-    (reset! previous-left-mouse-down current-left-mouse-down)
-    (reset! previous-right-mouse-down current-right-mouse-down)
+    :else
+    entities))
 
-    (let [pos [(q/mouse-x) (q/mouse-y)]
-          left-click-result
-        (reduce
-          (fn [agg [id components]]
-            (if (true? @left-mouse-click)
-              (let [on-left-click (get-in components [:clickable :on-left-click])]
-                (assoc-in agg [id] (on-left-click pos components)))
-              agg))
-          entities
-          clickables)]
-        (reduce
-          (fn [agg [id components]]
-            (if (true? @right-mouse-click)
-              (let [on-right-click (get-in components [:clickable :on-right-click])]
-                (assoc-in agg [id] (on-right-click pos components)))
-              agg))
-          left-click-result
-          clickables))))
+(defn clicking [entities]
+  (if @mouse-clicked?
+    (reduce
+      (fn [agg [id components]]
+        (let [on-click (get-in components [:clickable :on-click])]
+          (assoc-in agg [id] (on-click @mouse-button @mouse-position components))))
+      entities
+      (ces/filter-entities entities :clickable))
+    entities))

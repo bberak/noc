@@ -271,8 +271,10 @@
                            p (VerletParticle2D. pos)]
                        (.addParticle physics p)
                        p))
-                     (range 0 20))
+                   (range 0 20))
         hit-radius 40
+        spring-length 160
+        spring-tension 0.001
         dist-func (fn [mouse-pos p]
                     (let [particle-pos (Vec2D. (.x p) (.y p))] 
                       (.distanceTo mouse-pos particle-pos)))]
@@ -280,33 +282,33 @@
       (if (not-empty tail)
         (let []
           (doseq [other tail]
-            (.addSpring physics (VerletSpring2D. head other 160 0.001)))
+            (.addSpring physics (VerletSpring2D. head other spring-length spring-tension)))
           (recur tail))))
     (ces/entity {:graph nil
                  :nodes nodes
                  :renderable r/graph
-                 :draggable {:hit-test (fn [pos components]
-                                         (let [mouse-pos (Vec2D. (first pos) (second pos))
-                                               nodes (:nodes components)]
-                                           (first (filter #(< (dist-func mouse-pos %) hit-radius) nodes))))
-                             :get-pos (fn [node components] [(.x node) (.y node)])
-                             :on-drag (fn [prev-pos pos node components]
-                                         (let [prev-mouse-pos (Vec2D. (first prev-pos) (second prev-pos))
-                                               mouse-pos (Vec2D. (first pos) (second pos))
-                                               diff (.sub mouse-pos prev-mouse-pos)]
-                                            (.lock node)
-                                            (set! (. node x) (+ (.x node) (.x diff)))
-                                            (set! (. node y) (+ (.y node) (.y diff)))                                              
-                                            (.unlock node)))}
-                 :clickable {:on-left-click (fn [pos components]
-                                              (if (nil? (get-in components [:draggable :dragging]))
-                                                (let [new-node (VerletParticle2D. (Vec2D. (first pos) (second pos)))
-                                                      nodes (:nodes components)]
-                                                  (doseq [other nodes]
-                                                    (.addSpring physics (VerletSpring2D. new-node other 160 0.001)))
-                                                  (assoc-in components [:nodes] (conj nodes new-node)))
-                                                components))
-                             :on-right-click (fn [pos components] components)}})))
+                 :draggable {:on-drag (fn [mouse-button start-pos end-pos components]
+                                        (let [start-pos-vec (Vec2D. (first start-pos) (second start-pos))
+                                              nodes (:nodes components)
+                                              target (or (get-in components [:draggable :target]) (first (filter #(< (dist-func start-pos-vec %) hit-radius) nodes)))]
+                                          (if (not-nil? target)
+                                            (let []
+                                              (.lock target)
+                                              (set! (. target x) (+ (first end-pos)))
+                                              (set! (. target y) (+ (second end-pos)))                                              
+                                              (.unlock target)
+                                              (assoc-in components [:draggable :target] target))
+                                            components)))
+                             :on-drag-end (fn [components]
+                                            (assoc-in components [:draggable :target] nil))}
+                 :clickable {:on-click (fn [mouse-button pos components]
+                                          (if (nil? (get-in components [:draggable :target]))
+                                            (let [new-node (VerletParticle2D. (Vec2D. (first pos) (second pos)))
+                                                  nodes (:nodes components)]
+                                              (doseq [other nodes]
+                                                (.addSpring physics (VerletSpring2D. new-node other spring-length spring-tension)))
+                                              (assoc-in components [:nodes] (conj nodes new-node)))
+                                            components))}})))
 
 
 
