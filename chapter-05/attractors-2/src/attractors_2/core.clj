@@ -15,11 +15,10 @@
   (q/noise-detail 1)
   (let [physics (VerletPhysics2D.)]
     (.setWorldBounds physics (Rect. 0 0 (q/width) (q/height)))
-    ;;(.addBehavior physics (GravityBehavior. (Vec2D. 0 0.5)))
+    (.addBehavior physics (GravityBehavior. (Vec2D. 0 0.5)))
     (merge {}
            (e/physics physics)
-           (e/graph physics (Vec2D. 200 100))
-           ;;(e/pendulum physics (Vec2D. 400 100))
+           (e/pendulum physics (Vec2D. 400 100))
            )))
 
 (defn prog-loop [entities]

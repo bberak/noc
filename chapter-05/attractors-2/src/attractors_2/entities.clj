@@ -213,25 +213,42 @@
     (.lock first-particle)
     (reduce 
       (fn [a b]
-        (.addSpring physics (VerletSpring2D. a b 20 0.81))
+        (.addSpring physics (VerletSpring2D. a b radius 0.81))
         b)
       particles)
     (ces/entity {:pendulum nil
                  :particles particles
                  :renderable r/pendulum
                  :radius radius
-                 :draggable {:on-drag-end (fn [components] components)
-                             :on-drag (fn [mouse-button start-pos end-pos components]
-                                       (let [vec-1 (Vec2D. (first end-pos) (second end-pos))
-                                             vec-2 (Vec2D. (.x last-particle) (.y last-particle))
-                                             distance (.distanceTo vec-1 vec-2)]
-                                         (if (< distance radius)
-                                           (let[]
-                                              (.lock last-particle)
-                                              (set! (. last-particle x) (first end-pos))
-                                              (set! (. last-particle y) (second end-pos))
-                                              (.unlock last-particle))))
-                                       components)}})))
+                 :mouse-input {:on-mouse-move (fn [start-pos end-pos components] components)
+                               :on-mouse-down (fn [mouse-button pos components]
+                                                 (let [vec-1 (Vec2D. (first pos) (second pos))
+                                                       vec-2 (Vec2D. (.x last-particle) (.y last-particle))
+                                                       distance (.distanceTo vec-1 vec-2)
+                                                       target (get-in components [:mouse-input :target])] ;; target is always last-particle
+                                                   (if (or (not-nil? target) (< distance radius))
+                                                     (let[]
+                                                        (.lock last-particle)
+                                                        (set! (. last-particle x) (first pos))
+                                                        (set! (. last-particle y) (second pos))
+                                                        (.unlock last-particle)
+                                                        (assoc-in components [:mouse-input :target] last-particle))
+                                                     components)))
+                               :on-mouse-up (fn [mouse-button pos components]
+                                              (assoc-in components [:mouse-input :target] nil))
+                               :on-mouse-drag (fn [mouse-button start-pos end-pos components]
+                                                 (let [vec-1 (Vec2D. (first end-pos) (second end-pos))
+                                                       vec-2 (Vec2D. (.x last-particle) (.y last-particle))
+                                                       distance (.distanceTo vec-1 vec-2)
+                                                       target (get-in components [:mouse-input :target])] ;; target is always last-particle
+                                                   (if (or (not-nil? target) (< distance radius))
+                                                     (let[]
+                                                        (.lock last-particle)
+                                                        (set! (. last-particle x) (first end-pos))
+                                                        (set! (. last-particle y) (second end-pos))
+                                                        (.unlock last-particle)
+                                                        (assoc-in components [:mouse-input :target] last-particle))
+                                                     components)))}})))
 
 (defn cloth [physics pos]
   (let [particles (vec (map (fn [y]
