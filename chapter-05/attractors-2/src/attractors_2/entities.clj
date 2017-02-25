@@ -204,8 +204,10 @@
 (defn pendulum [physics pos]
   (let [particles (map (fn [x]
                          (let [p (VerletParticle2D. (.add pos (Vec2D. x 0)))
-                               repelling-behavior (AttractionBehavior. p 500 -1)]
+                               attracting-behavior (AttractionBehavior. p 600 0.8)
+                               repelling-behavior (AttractionBehavior. p 200 -1)]
                            (.addParticle physics p)
+                           (.addBehavior physics attracting-behavior)
                            (.addBehavior physics repelling-behavior)
                            p)) 
                        (range 0 400 20))
