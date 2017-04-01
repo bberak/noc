@@ -5,9 +5,10 @@
             [seek.renderers :as r]
             [org.nfrac.cljbox2d.core :as box]
             [org.nfrac.cljbox2d.vec2d :as v2])
-  (:import [toxi.physics2d VerletParticle2D VerletSpring2D] 
-           [toxi.physics2d.behaviors AttractionBehavior]
-           [toxi.geom Vec2D Rect]))
+  (:import [toxi.physics2d VerletParticle2D VerletSpring2D VerletConstrainedSpring2D VerletMinDistanceSpring2D] 
+           [toxi.physics2d.behaviors AttractionBehavior GravityBehavior]
+           [toxi.geom Vec2D Rect]
+           [toxi.physics2d.constraints CircularConstraint]))
 
 (defn world [world]
   (ces/entity {:world world}))
@@ -360,23 +361,31 @@
                                                     components)))
                              :on-mouse-move (fn [start-pos end-pos components] components)}})))
 
-(defn seeker [physics pos]
+(defn predator [physics pos]
   (let [verlet-particle (VerletParticle2D. pos)]
     (.addParticle physics verlet-particle)
     (ces/entity {:particle verlet-particle
                  :seekable {:max-speed 5
                             :max-force 0.21}
-                 :renderable r/seeker})))
+                 :renderable r/particle-with-heading})))
 
-(defn fleeing-particle [physics pos]
-  (let [verlet-particle (VerletParticle2D. pos)]
-    (.addParticle physics verlet-particle)
-    ;;(doseq [b behaviors]
-    ;;  (.addBehavior verlet-particle b))
-    (ces/entity {:particle verlet-particle
+(defn prey [physics pos]
+  (let [particles (map 
+                    (fn [x]
+                      (let [p (VerletParticle2D. (Vec2D. (+ (.x pos) x) (.y pos)))]
+                        (.addParticle physics p)
+                        p))
+                    (range 0 200 10))]
+    (reduce 
+      (fn [a b]
+        (.addSpring physics (VerletSpring2D. a b (.distanceTo a b) 0.05))
+        b)
+      particles)
+    (.lock (first particles))
+    (ces/entity {:particle (last particles)
                  :fleeable {:max-speed 5
-                            :max-force 0.01}
-                 :renderable r/seeker})))
+                            :max-force 0.81}
+                 :renderable r/particle-with-heading})))
 
 
 

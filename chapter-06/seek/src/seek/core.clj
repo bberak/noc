@@ -17,8 +17,8 @@
     (.setWorldBounds physics (Rect. 0 0 (q/width) (q/height)))
     (merge {}
            (e/physics physics)
-           (e/seeker physics (Vec2D. 400 100))
-           (e/fleeing-particle physics (Vec2D. 200 100)))))
+           (e/predator physics (Vec2D. 400 100))
+           (e/prey physics (Vec2D. 400 300)))))
 
 (defn prog-loop [entities]
   (-> entities

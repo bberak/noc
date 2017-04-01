@@ -179,7 +179,7 @@
     (doseq [n nodes]
       (q/ellipse (.x n) (.y n) 20 20))))
 
-(defn seeker [particle-components]
+(defn particle-with-heading [particle-components]
   (let [particle (:particle particle-components)
         velocity (.getVelocity particle)
         heading (q/atan2 (.y velocity) (.x velocity))] ;; q/atan2 expects the y parameter first, then the x
