@@ -1,5 +1,6 @@
 (ns seek.entities
-  (:require [seek.helpers :refer :all]
+  (:require [quil.core :as q]
+            [seek.helpers :refer :all]
             [seek.ces :as ces]
             [seek.renderers :as r]
             [org.nfrac.cljbox2d.core :as box]
@@ -364,8 +365,18 @@
     (.addParticle physics verlet-particle)
     (ces/entity {:particle verlet-particle
                  :seekable {:max-speed 5
-                            :max-force 0.1}
-                 :renderable r/particle})))
+                            :max-force 0.21}
+                 :renderable r/seeker})))
+
+(defn fleeing-particle [physics pos]
+  (let [verlet-particle (VerletParticle2D. pos)]
+    (.addParticle physics verlet-particle)
+    ;;(doseq [b behaviors]
+    ;;  (.addBehavior verlet-particle b))
+    (ces/entity {:particle verlet-particle
+                 :fleeable {:max-speed 5
+                            :max-force 0.01}
+                 :renderable r/seeker})))
 
 
 

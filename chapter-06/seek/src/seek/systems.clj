@@ -247,14 +247,29 @@
             particle (:particle components)
             particle-pos (Vec2D. (.x particle) (.y particle))
             mouse-pos (Vec2D. (first @mouse-position) (second @mouse-position))
-            diff (.sub mouse-pos particle-pos)
-            the-force (.limit diff max-force)]
-        (println the-force)
-        (.addForce particle the-force)
+            current-velocity (.getVelocity particle)
+            desired-velocity (.limit (.sub mouse-pos particle-pos) max-speed)
+            steering (.limit (.sub desired-velocity current-velocity) max-force)]
+        (.addForce particle steering)
         (assoc-in agg [id] components)))
     entities
     (ces/filter-entities entities :seekable)))
 
+(defn fleeing [entities]
+  (reduce 
+    (fn [agg [id components]]
+      (let [max-speed (get-in components [:fleeable :max-speed])
+            max-force (get-in components [:fleeable :max-force])
+            particle (:particle components)
+            particle-pos (Vec2D. (.x particle) (.y particle))
+            mouse-pos (Vec2D. (first @mouse-position) (second @mouse-position))
+            current-velocity (.getVelocity particle)
+            desired-velocity (.getInverted (.limit (.sub mouse-pos particle-pos) max-speed))
+            steering (.limit (.sub desired-velocity current-velocity) max-force)]
+        (.addForce particle steering)
+        (assoc-in agg [id] components)))
+    entities
+    (ces/filter-entities entities :fleeable)))
 
 
 
