@@ -248,7 +248,7 @@
             particle-pos (Vec2D. (.x particle) (.y particle))
             mouse-pos (Vec2D. (first @mouse-position) (second @mouse-position))
             current-velocity (.getVelocity particle)
-            desired-velocity (.limit (.sub mouse-pos particle-pos) max-speed)
+            desired-velocity (.limit (.sub mouse-pos particle-pos) max-speed) ;; This is slightly different to the book - it allows the entity to stop on the target
             steering (.limit (.sub desired-velocity current-velocity) max-force)]
         (.addForce particle steering)
         (assoc-in agg [id] components)))
@@ -267,7 +267,7 @@
             mouse-velocity (.sub mouse-pos previous-mouse-pos)
             future-mouse-pos (.add mouse-pos (.scale mouse-velocity (float 6)))
             current-particle-velocity (.getVelocity particle)
-            desired-particle-velocity (.limit (.sub future-mouse-pos particle-pos) max-speed)
+            desired-particle-velocity (.limit (.sub future-mouse-pos particle-pos) max-speed) ;; This is slightly different to the book - it allows the entity to stop on the target
             steering (.limit (.sub desired-particle-velocity current-particle-velocity) max-force)]
         (.addForce particle steering)
         (assoc-in agg [id] components)))
