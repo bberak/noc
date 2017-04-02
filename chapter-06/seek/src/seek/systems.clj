@@ -168,9 +168,9 @@
         entities
         draggables))))
 
-(def previous-mouse-position (atom nil))
+(def previous-mouse-position (atom [0 0]))
 (def previous-mouse-button (atom nil))
-(def mouse-position (atom nil))
+(def mouse-position (atom [0 0]))
 (def mouse-button (atom nil))
 (def mouse-down? (atom false))
 (def mouse-move? (atom false))
@@ -254,6 +254,25 @@
         (assoc-in agg [id] components)))
     entities
     (ces/filter-entities entities :seekable)))
+
+(defn pursuing [entities]
+  (reduce 
+    (fn [agg [id components]]
+      (let [max-speed (get-in components [:pursueable :max-speed])
+            max-force (get-in components [:pursueable :max-force])
+            particle (:particle components)
+            particle-pos (Vec2D. (.x particle) (.y particle))
+            mouse-pos (Vec2D. (first @mouse-position) (second @mouse-position))
+            previous-mouse-pos (Vec2D. (first @previous-mouse-position) (second @previous-mouse-position))
+            mouse-velocity (.sub mouse-pos previous-mouse-pos)
+            future-mouse-pos (.add mouse-pos (.scale mouse-velocity (float 6)))
+            current-particle-velocity (.getVelocity particle)
+            desired-particle-velocity (.limit (.sub future-mouse-pos particle-pos) max-speed)
+            steering (.limit (.sub desired-particle-velocity current-particle-velocity) max-force)]
+        (.addForce particle steering)
+        (assoc-in agg [id] components)))
+    entities
+    (ces/filter-entities entities :pursueable)))
 
 (defn fleeing [entities]
   (reduce 

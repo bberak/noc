@@ -181,9 +181,10 @@
 
 (defn particle-with-heading [particle-components]
   (let [particle (:particle particle-components)
+        color (:color particle-components)
         velocity (.getVelocity particle)
         heading (q/atan2 (.y velocity) (.x velocity))] ;; q/atan2 expects the y parameter first, then the x
-    (q/fill 251 77 104)
+    (apply q/fill color)
     (q/with-translation [(.x particle) (.y particle)]
       (q/with-rotation [heading]
         (q/triangle 34 0 0 9 0 -9)))))

@@ -18,6 +18,7 @@
     (merge {}
            (e/physics physics)
            (e/predator physics (Vec2D. 400 100))
+           (e/smart-predator physics (Vec2D. 400 500))
            (e/prey physics (Vec2D. 400 300)))))
 
 (defn prog-loop [entities]
@@ -25,6 +26,7 @@
       (s/game-time)
       (s/mouse-input)
       (s/seeking)
+      (s/pursuing)
       (s/fleeing)
       (s/rendering)))
 

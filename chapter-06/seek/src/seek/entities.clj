@@ -365,8 +365,18 @@
   (let [verlet-particle (VerletParticle2D. pos)]
     (.addParticle physics verlet-particle)
     (ces/entity {:particle verlet-particle
+                 :color [251 77 104]
                  :seekable {:max-speed 5
                             :max-force 0.21}
+                 :renderable r/particle-with-heading})))
+
+(defn smart-predator [physics pos]
+  (let [verlet-particle (VerletParticle2D. pos)]
+    (.addParticle physics verlet-particle)
+    (ces/entity {:particle verlet-particle
+                 :color [255 10 10]
+                 :pursueable {:max-speed 5
+                              :max-force 0.21}
                  :renderable r/particle-with-heading})))
 
 (defn prey [physics pos]
@@ -383,6 +393,7 @@
       particles)
     (.lock (first particles))
     (ces/entity {:particle (last particles)
+                 :color [40 40 255]
                  :fleeable {:max-speed 5
                             :max-force 0.81}
                  :renderable r/particle-with-heading})))
