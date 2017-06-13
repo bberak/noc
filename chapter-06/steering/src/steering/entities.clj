@@ -366,8 +366,8 @@
     (.addParticle physics verlet-particle)
     (ces/entity {:particle verlet-particle
                  :color [251 77 104]
-                 :seekable {:max-speed 5
-                            :max-force 0.21}
+                 :seekable {:max-speed 4
+                            :max-force 0.05}
                  :renderable r/particle-with-heading})))
 
 (defn smart-predator [physics pos]
@@ -375,8 +375,8 @@
     (.addParticle physics verlet-particle)
     (ces/entity {:particle verlet-particle
                  :color [255 10 10]
-                 :pursueable {:max-speed 5
-                              :max-force 0.21
+                 :pursueable {:max-speed 4
+                              :max-force 0.05
                               :proximity-distance 200}
                  :renderable r/particle-with-heading})))
 
@@ -397,6 +397,18 @@
                  :color [40 40 255]
                  :fleeable {:max-speed 5
                             :max-force 0.81}
+                 :renderable r/particle-with-heading})))
+
+(defn wanderer [physics pos]
+  (let [verlet-particle (VerletParticle2D. pos)]
+    (.addParticle physics verlet-particle)
+    (ces/entity {:particle verlet-particle
+                 :color [44 202 104]
+                 :wanderable {:max-speed 1.25
+                              :max-force 0.025
+                              :perception-radius 25
+                              :future-location-distance 80
+                              :wander-theta 0}
                  :renderable r/particle-with-heading})))
 
 

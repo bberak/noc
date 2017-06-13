@@ -298,6 +298,40 @@
     entities
     (ces/filter-entities entities :fleeable)))
 
+(defn wandering [entities]
+  (reduce 
+    (fn [agg [id components]]
+      (let [particle (:particle components)
+            max-speed (get-in components [:wanderable :max-speed])
+            max-force (get-in components [:wanderable :max-force])
+            perception-radius (get-in components [:wanderable :perception-radius])
+            future-location-distance (get-in components [:wanderable :future-location-distance])
+            wander-theta (get-in components [:wanderable :wander-theta])
+
+            ;; Increment or decrement theta
+            new-wander-theta (+ wander-theta (q/random -0.3 0.3))
+
+            ;; Calculate the center of circle
+            particle-pos (Vec2D. (.x particle) (.y particle))
+            current-velocity (.getVelocity particle)
+            lookahead-pos (.scale (.normalize current-velocity) (float future-location-distance))
+            circle-pos (.add particle-pos lookahead-pos)
+
+            ;; Find the target (on circle's circumference)
+            heading (q/atan2 (.y current-velocity) (.x current-velocity))
+            x (* perception-radius (q/cos (+ new-wander-theta heading)))
+            y (* perception-radius (q/sin (+ new-wander-theta heading)))
+            circle-offset (Vec2D. x y)
+            target (.add circle-pos circle-offset)
+            
+            ;; Find the desired velocity and steering force
+            desired-velocity (.scale (.normalize (.sub target particle-pos)) (float max-speed))
+            steering (.limit (.sub desired-velocity current-velocity) max-force)]
+        (.addForce particle steering)
+        (assoc-in agg [id :wanderable :wander-theta] new-wander-theta)))
+    entities
+    (ces/filter-entities entities :wanderable)))
+
 
 
 

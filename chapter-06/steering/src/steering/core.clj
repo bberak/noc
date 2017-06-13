@@ -19,7 +19,8 @@
            (e/physics physics)
            (e/predator physics (Vec2D. 400 100))
            (e/smart-predator physics (Vec2D. 400 500))
-           (e/prey physics (Vec2D. 400 300)))))
+           (e/prey physics (Vec2D. 400 300))
+           (e/wanderer physics (Vec2D. 600 300)))))
 
 (defn prog-loop [entities]
   (-> entities
@@ -28,6 +29,7 @@
       (s/seeking)
       (s/pursuing)
       (s/fleeing)
+      (s/wandering)
       (s/rendering)))
 
 (defn -main []
