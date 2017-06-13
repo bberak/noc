@@ -405,10 +405,13 @@
     (ces/entity {:particle verlet-particle
                  :color [44 202 104]
                  :wanderable {:max-speed 1.25
-                              :max-force 0.025
+                              :max-force 0.035
                               :perception-radius 25
                               :future-location-distance 80
                               :wander-theta 0}
+                 :boundable {:max-speed 2.25
+                             :max-force 0.25
+                             :distance 100}
                  :renderable r/particle-with-heading})))
 
 

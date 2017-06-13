@@ -30,6 +30,7 @@
       (s/pursuing)
       (s/fleeing)
       (s/wandering)
+      (s/boundary)
       (s/rendering)))
 
 (defn -main []

@@ -332,6 +332,34 @@
     entities
     (ces/filter-entities entities :wanderable)))
 
+(defn boundary [entities]
+  (reduce 
+    (fn [agg [id components]]
+      (let [particle (:particle components)
+            max-speed (get-in components [:boundable :max-speed]) 
+            max-force (get-in components [:boundable :max-force])
+            distance (get-in components [:boundable :distance])      
+            pos (Vec2D. (.x particle) (.y particle))
+            velocity (.getVelocity particle)
+
+            x-force (cond 
+                      (< (.x pos) distance) max-speed
+                      (> (.x pos) (- (q/width) distance)) (- max-speed)
+                      :else 0)
+            y-force (cond 
+                      (< (.y pos) distance) max-speed
+                      (> (.y pos) (- (q/height) distance)) (- max-speed)
+                      :else 0)
+
+            desired-velocity (Vec2D. x-force y-force)
+            steering (if (> (.magnitude desired-velocity) 0) 
+                       (.limit (.sub desired-velocity velocity) max-force)
+                       (Vec2D. 0 0))]
+        (.addForce particle steering)
+        (assoc-in agg [id] components)))
+    entities
+    (ces/filter-entities entities :boundable)))
+
 
 
 
