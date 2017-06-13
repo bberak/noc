@@ -248,7 +248,8 @@
             particle-pos (Vec2D. (.x particle) (.y particle))
             mouse-pos (Vec2D. (first @mouse-position) (second @mouse-position))
             current-velocity (.getVelocity particle)
-            desired-velocity (.limit (.sub mouse-pos particle-pos) max-speed) ;; This is slightly different to the book - it allows the entity to stop on the target
+            ;; desired-velocity (.limit (.sub mouse-pos particle-pos) max-speed) ;; This is slightly different to the book - it allows the entity to stop on the target
+            desired-velocity (.scale (.normalize (.sub mouse-pos particle-pos)) (float max-speed)) ;; This is the book version
             steering (.limit (.sub desired-velocity current-velocity) max-force)]
         (.addForce particle steering)
         (assoc-in agg [id] components)))
@@ -260,15 +261,22 @@
     (fn [agg [id components]]
       (let [max-speed (get-in components [:pursueable :max-speed])
             max-force (get-in components [:pursueable :max-force])
+            proximity-distance (get-in components [:pursueable :proximity-distance])
             particle (:particle components)
             particle-pos (Vec2D. (.x particle) (.y particle))
             mouse-pos (Vec2D. (first @mouse-position) (second @mouse-position))
             previous-mouse-pos (Vec2D. (first @previous-mouse-position) (second @previous-mouse-position))
             mouse-velocity (.sub mouse-pos previous-mouse-pos)
             future-mouse-pos (.add mouse-pos (.scale mouse-velocity (float 6)))
+            distance (.magnitude (.sub future-mouse-pos particle-pos))
             current-particle-velocity (.getVelocity particle)
-            desired-particle-velocity (.limit (.sub future-mouse-pos particle-pos) max-speed) ;; This is slightly different to the book - it allows the entity to stop on the target
-            steering (.limit (.sub desired-particle-velocity current-particle-velocity) max-force)]
+            ;; desired-particle-velocity (.limit (.sub future-mouse-pos particle-pos) max-speed) ;; This is slightly different to the book - it allows the entity to stop on the target
+            desired-particle-velocity (.scale (.normalize (.sub future-mouse-pos particle-pos)) (float max-speed)) ;; This is the book version
+            buffer 40 ;; We want the predator to stop just before the target
+            smart-desired-particle-velocity (if (true? (> distance proximity-distance)) 
+                                              desired-particle-velocity 
+                                              (.scale desired-particle-velocity (float (/ (- distance buffer) proximity-distance))))
+            steering (.limit (.sub smart-desired-particle-velocity current-particle-velocity) max-force)]
         (.addForce particle steering)
         (assoc-in agg [id] components)))
     entities

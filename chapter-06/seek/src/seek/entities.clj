@@ -376,7 +376,8 @@
     (ces/entity {:particle verlet-particle
                  :color [255 10 10]
                  :pursueable {:max-speed 5
-                              :max-force 0.21}
+                              :max-force 0.21
+                              :proximity-distance 200}
                  :renderable r/particle-with-heading})))
 
 (defn prey [physics pos]
